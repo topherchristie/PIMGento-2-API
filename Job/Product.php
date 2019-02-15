@@ -116,6 +116,13 @@ class Product extends Import
         'groups',
         'parent',
         'enabled',
+        'created',
+        'updated',
+        'associations',
+        'PACK',
+        'SUBSTITUTION',
+        'UPSELL',
+        'X_SELL',
     ];
     /**
      * This variable contains a ProductImportHelper
