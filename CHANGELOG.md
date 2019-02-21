@@ -35,3 +35,20 @@ Add PHP 7.2 compatibility
 Fix error on product_model table
 
 Add configuration to enable or disable product URL rewriting
+
+### 100.2.1 :
+Fix ACL for import jobs
+
+Fix family exclusion configuration that was impossible to set empty
+
+Fix configurable product association import
+
+Fix product website association from channel mapping
+
+Add configuration to set channel for admin values
+
+Add configuration to choose to update product URL rewrite or not
+
+Prevent price from being set to "null" if empty
+
+Add no-whitespace validation to Akeneo API credential fields
