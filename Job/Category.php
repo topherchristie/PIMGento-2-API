@@ -446,9 +446,9 @@ class Category extends Import
         $tmpTable = $this->entitiesHelper->getTableName($this->getCode());
         /** @var array $values */
         $values = [
-            'is_active'       => new Expr(1),
-            'include_in_menu' => new Expr(1),
-            'is_anchor'       => new Expr(1),
+            'is_active'       => new Expr($this->configHelper->getIsCategoryActive()),
+            'include_in_menu' => new Expr($this->configHelper->getIsCategoryInMenu()),
+            'is_anchor'       => new Expr($this->configHelper->getIsCategoryAnchor()),
             'display_mode'    => new Expr('"' . CategoryModel::DM_PRODUCT . '"'),
         ];
 
