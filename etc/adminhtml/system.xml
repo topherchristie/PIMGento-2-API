@@ -152,6 +152,7 @@
                     <backend_model>Pimgento\Api\Model\Backend\Json</backend_model>
                     <comment>
                         <![CDATA[Build your query using a json.<br/>
+                        Please, ensure that your JSON format is valid before using advanced filter.<br/>
 For example :<br/>
 <pre>
 {
