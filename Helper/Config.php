@@ -46,7 +46,6 @@ class Config extends AbstractHelper
     const PRODUCTS_FILTERS_MODE = 'pimgento/products_filters/mode';
     const PRODUCTS_FILTERS_COMPLETENESS_TYPE = 'pimgento/products_filters/completeness_type';
     const PRODUCTS_FILTERS_COMPLETENESS_VALUE = 'pimgento/products_filters/completeness_value';
-    const PRODUCTS_FILTERS_COMPLETENESS_SCOPE = 'pimgento/products_filters/completeness_scope';
     const PRODUCTS_FILTERS_COMPLETENESS_LOCALES = 'pimgento/products_filters/completeness_locales';
     const PRODUCTS_FILTERS_STATUS = 'pimgento/products_filters/status';
     const PRODUCTS_FILTERS_FAMILIES = 'pimgento/products_filters/families';
@@ -62,7 +61,6 @@ class Config extends AbstractHelper
     const PRODUCT_ASSET_ENABLED = 'pimgento/product/asset_enabled';
     const PRODUCT_ASSET_GALLERY = 'pimgento/product/asset_gallery';
     const ATTRIBUTE_TYPES = 'pimgento/attribute/types';
-
     /**
      * @var int PAGINATION_SIZE_DEFAULT_VALUE
      */
@@ -113,14 +111,14 @@ class Config extends AbstractHelper
     /**
      * Config constructor
      *
-     * @param Context $context
-     * @param Encryptor $encryptor
-     * @param Serializer $serializer
-     * @param EavConfig $eavConfig
-     * @param StoreManagerInterface $storeManager
+     * @param Context                       $context
+     * @param Encryptor                     $encryptor
+     * @param Serializer                    $serializer
+     * @param EavConfig                     $eavConfig
+     * @param StoreManagerInterface         $storeManager
      * @param CatalogInventoryConfiguration $catalogInventoryConfiguration
-     * @param Filesystem $filesystem
-     * @param MediaConfig $mediaConfig
+     * @param Filesystem                    $filesystem
+     * @param MediaConfig                   $mediaConfig
      */
     public function __construct(
         Context $context,
@@ -241,16 +239,6 @@ class Config extends AbstractHelper
     }
 
     /**
-     * Retrieve the scope to apply the completeness filter on
-     *
-     * @return string
-     */
-    public function getCompletenessScopeFilter()
-    {
-        return $this->scopeConfig->getValue(self::PRODUCTS_FILTERS_COMPLETENESS_SCOPE);
-    }
-
-    /**
      * Retrieve the locales to apply the completeness filter on
      *
      * @return string
@@ -305,37 +293,70 @@ class Config extends AbstractHelper
     }
 
     /**
+     * Get Admin Website Default Channel from configuration
+     *
+     * @return string
+     */
+    public function getAdminDefaultChannel()
+    {
+        return $this->scopeConfig->getValue(self::AKENEO_API_ADMIN_CHANNEL);
+    }
+
+    /**
      * Retrieve website mapping
+     *
+     * @param bool $withDefault
      *
      * @return mixed[]
      */
-    public function getWebsiteMapping()
+    public function getWebsiteMapping($withDefault = true)
     {
-        /** @var string $adminChannel */
-        $adminChannel = $this->scopeConfig->getValue(self::AKENEO_API_ADMIN_CHANNEL);
+        /** @var mixed[] $mapping */
+        $mapping = [];
 
-        if (empty($adminChannel)) {
-            return [];
-        }
-        /** @var mixed[] $fullMapping */
-        $fullMapping = [
-            [
+        if ($withDefault === true) {
+            /** @var string $adminChannel */
+            $adminChannel = $this->getAdminDefaultChannel();
+            if (empty($adminChannel)) {
+                return $mapping;
+            }
+
+            $mapping[] = [
                 'channel' => $adminChannel,
                 'website' => $this->storeManager->getWebsite(0)->getCode(),
-            ],
-        ];
-        /** @var string $mapping */
-        $mapping = $this->scopeConfig->getValue(self::AKENEO_API_WEBSITE_MAPPING);
-        if (empty($mapping)) {
-            return $fullMapping;
-        }
-        /** @var  $mapping */
-        $mapping = $this->serializer->unserialize($mapping);
-        if (!empty($mapping) && is_array($mapping)) {
-            $fullMapping = array_merge($fullMapping, $mapping);
+            ];
         }
 
-        return $fullMapping;
+        /** @var string $websiteMapping */
+        $websiteMapping = $this->scopeConfig->getValue(self::AKENEO_API_WEBSITE_MAPPING);
+        if (empty($websiteMapping)) {
+            return $mapping;
+        }
+
+        /** @var mixed[] $websiteMapping */
+        $websiteMapping = $this->serializer->unserialize($websiteMapping);
+        if (empty($websiteMapping) || !is_array($websiteMapping)) {
+            return $mapping;
+        }
+
+        $mapping = array_merge($mapping, $websiteMapping);
+
+        return $mapping;
+    }
+
+    /**
+     * Get mapped channels
+     *
+     * @return string[]
+     */
+    public function getMappedChannels()
+    {
+        /** @var mixed[] $mapping */
+        $mapping = $this->getWebsiteMapping();
+        /** @var string[] $channels */
+        $channels = array_column($mapping, 'channel', 'channel');
+
+        return $channels;
     }
 
     /**

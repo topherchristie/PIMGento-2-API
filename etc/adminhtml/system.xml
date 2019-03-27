@@ -12,36 +12,29 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
-        <section id="pimgento" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="0"
-                 showInStore="0">
+        <section id="pimgento" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="0" showInStore="0">
             <label>Pimgento</label>
             <tab>catalog</tab>
             <resource>Pimgento_Import::config_pimgento</resource>
-            <group id="akeneo_api" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0"
-                   showInStore="0">
+            <group id="akeneo_api" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Akeneo API Configuration</label>
-                <field id="base_url" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0"
-                       showInStore="0">
+                <field id="base_url" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Akeneo base URL</label>
                 </field>
-                <field id="username" translate="label comment" type="text" sortOrder="20" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
+                <field id="username" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Akeneo username</label>
                     <comment>The Akeneo user should have permissions to list</comment>
                     <validate>no-whitespace</validate>
                 </field>
-                <field id="password" translate="label" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="0"
-                       showInStore="0">
+                <field id="password" translate="label" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Akeneo password</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                 </field>
-                <field id="client_id" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="0"
-                       showInStore="0">
+                <field id="client_id" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Akeneo API client ID</label>
                     <validate>no-whitespace</validate>
                 </field>
-                <field id="client_secret" translate="label" type="text" sortOrder="50" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
+                <field id="client_secret" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Akeneo API client secret</label>
                     <validate>no-whitespace</validate>
                 </field>
@@ -49,8 +42,7 @@
                     <frontend_model>Pimgento\Api\Block\Adminhtml\System\Config\Api\Test</frontend_model>
                     <label>Test API credentials</label>
                 </field>
-                <field id="is_enterprise" translate="label" type="select" sortOrder="70" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
+                <field id="is_enterprise" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Is Akeneo enterprise edition</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
@@ -71,62 +63,47 @@
                     <validate>required-entry</validate>
                 </field>
             </group>
-            <group id="products_filters" translate="label" type="text" sortOrder="20" showInDefault="1"
-                   showInWebsite="0" showInStore="0">
+            <group id="products_filters" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Filter products</label>
-                <field id="mode" translate="label comment" type="select" sortOrder="10" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
+                <field id="mode" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Mode</label>
                     <source_model>Pimgento\Api\Model\Source\Filters\Mode</source_model>
                 </field>
-                <field id="completeness_type" translate="label" type="select" sortOrder="20" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
+                <field id="completeness_type" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Completeness type</label>
                     <source_model>Pimgento\Api\Model\Source\Filters\Completeness</source_model>
                     <depends>
                         <field id="mode">standard</field>
                     </depends>
                 </field>
-                <field id="completeness_scope" translate="label comment" type="select" sortOrder="30"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
-                    <label>Channel</label>
-                    <source_model>Pimgento\Api\Model\Source\Filters\Channel</source_model>
-                    <comment>Select the channel to apply the completeness filter on</comment>
-                    <depends>
-                        <field id="completeness_type" negative="1">no_condition</field>
-                        <field id="mode">standard</field>
-                    </depends>
-                </field>
-                <field id="completeness_locales" translate="label comment" type="multiselect" sortOrder="40"
-                       showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="completeness_locales" translate="label comment" type="multiselect" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Locales</label>
                     <source_model>Pimgento\Api\Model\Source\Filters\Locales</source_model>
                     <comment>Select the locales to apply the completeness filter on</comment>
+                    <validate>required-entry</validate>
                     <depends>
                         <field id="completeness_type" separator="," negative="1">
                             <![CDATA[<,<=,>,>=,=,!=,no_condition]]></field>
                         <field id="mode">standard</field>
                     </depends>
                 </field>
-                <field id="completeness_value" translate="label comment" type="text" sortOrder="50" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
+                <field id="completeness_value" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Completeness value</label>
                     <comment>Has to be a value between 0 and 100</comment>
+                    <validate>required-entry</validate>
                     <depends>
                         <field id="completeness_type" negative="1">no_condition</field>
                         <field id="mode">standard</field>
                     </depends>
                 </field>
-                <field id="status" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="0"
-                       showInStore="0">
+                <field id="status" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Status</label>
                     <source_model>Pimgento\Api\Model\Source\Filters\Status</source_model>
                     <depends>
                         <field id="mode">standard</field>
                     </depends>
                 </field>
-                <field id="updated" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="0"
-                       showInStore="0">
+                <field id="updated" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Updated</label>
                     <comment>
                         <![CDATA[Import only product updated since last X days. Leave blank for no filter.]]>
@@ -135,8 +112,7 @@
                         <field id="mode">standard</field>
                     </depends>
                 </field>
-                <field id="families" translate="label comment" type="multiselect" sortOrder="80" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
+                <field id="families" translate="label comment" type="multiselect" sortOrder="70" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Families</label>
                     <source_model>Pimgento\Api\Model\Source\Filters\Family</source_model>
                     <comment>
@@ -146,8 +122,7 @@
                         <field id="mode">standard</field>
                     </depends>
                 </field>
-                <field id="advanced_filter" translate="label comment" type="textarea" sortOrder="90" showInDefault="1"
-                       showInWebsite="0" showInStore="0">
+                <field id="advanced_filter" translate="label comment" type="textarea" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Advanced Filter</label>
                     <backend_model>Pimgento\Api\Model\Backend\Json</backend_model>
                     <comment>
