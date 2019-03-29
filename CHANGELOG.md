@@ -64,3 +64,12 @@ Fix SQL error when no association column is found using advanced filter
 
 ### 100.2.3 :
 Fix undefined offset on product import
+
+### 100.2.4 :
+Change default pagination value to 100
+
+Change wording for advanced JSON configuration
+
+Add SQL statement possibility in configurable mapping
+
+Add category configurations for anchor, status and display in menu
