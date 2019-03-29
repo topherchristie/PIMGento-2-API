@@ -75,7 +75,7 @@ Zum Beispiel :<br/>
 "Magento Attribute","Magento-Attribut"
 "Match Magento website with Pim channel","Magento-Webseite mit Pim-Kanal verknüpfen"
 "Media import is not enabled","Medienimport ist nicht aktiviert"
-"Must be a value between 1 and 100. Default value is 10.","Muss ein Wert zwischen 1 und 100 sein. Der Standardwert ist 10."
+"Must be a value between 1 and 100. Default value is 100.","Muss ein Wert zwischen 1 und 100 sein. Der Standardwert ist 100."
 "No condition","Keine Kondition"
 "No options found","Keine Optionen gefunden"
 "No results from Akeneo","Keine Ergebnisse von Akeneo"
