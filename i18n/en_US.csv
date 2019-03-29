@@ -56,6 +56,7 @@ For example :<br/>
 "Example:","Example:"
 "Families","Families"
 "Filter products","Filter products"
+"Fill configurable attributes with default value, leave blank to take simple product value or Product Model value if exists. Value must be a chain between quotes or an SQL statement.","Fill configurable attributes with default value, leave blank to take simple product value or Product Model value if exists. Value must be a chain between quotes or an SQL statement."
 "Greater or equals than on all locales","Greater or equals than on all locales"
 "Greater or equals than","Greater or equals than"
 "Greater than on all locales","Greater than on all locales"

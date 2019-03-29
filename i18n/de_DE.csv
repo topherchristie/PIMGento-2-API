@@ -56,6 +56,7 @@ Zum Beispiel :<br/>
 "Example:","Beispiel:"
 "Families","Familie"
 "Filter products","Filterprodukte"
+"Fill configurable attributes with default value, leave blank to take simple product value or Product Model value if exists. Value must be a chain between quotes or an SQL statement.","Füllen Sie konfigurierbare Attribute mit einem Standardwert, lassen Sie das Feld leer, um einen einfachen Produktwert oder einen Produktmodellwert zu erhalten, falls vorhanden. Der Wert muss eine SQL-Anweisung oder zwischen Anführungszeichen sein."
 "Greater or equals than on all locales","Größer oder gleich als in allen Gebietsschemata"
 "Greater or equals than","Größer oder gleich"
 "Greater than on all locales","Größer als in allen Gebietsschemata"
