@@ -56,7 +56,7 @@
                 </field>
                 <field id="pagination_size" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Pagination size</label>
-                    <comment>Must be a value between 1 and 100. Default value is 10.</comment>
+                    <comment>Must be a value between 1 and 100. Default value is 100.</comment>
                 </field>
                 <field id="admin_channel" translate="label comment" type="text" sortOrder="90" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Admin Website Channel</label>
