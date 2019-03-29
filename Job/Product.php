@@ -551,7 +551,7 @@ class Product extends Import
                 }
 
                 if (strlen($value) > 0) {
-                    $data[$column] = new Expr('"' . $value . '"');
+                    $data[$column] = new Expr($value);
 
                     continue;
                 }
