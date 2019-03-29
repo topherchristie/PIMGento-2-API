@@ -56,7 +56,7 @@
                 </field>
                 <field id="pagination_size" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Pagination size</label>
-                    <comment>Must be a value between 1 and 100. Default value is 10.</comment>
+                    <comment>Must be a value between 1 and 100. Default value is 100.</comment>
                 </field>
                 <field id="admin_channel" translate="label comment" type="text" sortOrder="90" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Admin Website Channel</label>
@@ -152,6 +152,7 @@
                     <backend_model>Pimgento\Api\Model\Backend\Json</backend_model>
                     <comment>
                         <![CDATA[Build your query using a json.<br/>
+                        Please, ensure that your JSON format is valid before using advanced filter.<br/>
 For example :<br/>
 <pre>
 {
@@ -172,6 +173,24 @@ For example :<br/>
                     <depends>
                         <field id="mode">advanced</field>
                     </depends>
+                </field>
+            </group>
+            <group id="category" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Category</label>
+                <field id="is_active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Activate new categories</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Newly imported categories will be activated</comment>
+                </field>
+                <field id="include_in_menu" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Include new categories in menu</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Newly imported categories categories will be included in menu</comment>
+                </field>
+                <field id="is_anchor" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Set new categories in anchor mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Newly imported categories will be in anchor mode</comment>
                 </field>
             </group>
             <group id="attribute" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
@@ -201,7 +220,7 @@ For example :<br/>
                     <label>Configurable</label>
                     <frontend_model>Pimgento\Api\Block\Adminhtml\System\Config\Form\Field\Configurable</frontend_model>
                     <backend_model>Magento\Config\Model\Config\Backend\Serialized\ArraySerialized</backend_model>
-                    <comment>Fill configurable attributes with default value, leave blank to take simple product value or variant value if exists</comment>
+                    <comment>Fill configurable attributes with default value, leave blank to take simple product value or Product Model value if exists. Value must be a chain between quotes or a SQL statement.</comment>
                 </field>
                 <field id="media_enabled" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Import Media Files</label>

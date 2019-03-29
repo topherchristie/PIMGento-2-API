@@ -18,7 +18,7 @@
                 <client_id>1_demo_client_id</client_id>
                 <client_secret>demo_secret</client_secret>
                 <is_enterprise>0</is_enterprise>
-                <pagination_size>10</pagination_size>
+                <pagination_size>100</pagination_size>
             </akeneo_api>
             <products_filters>
                 <mode>standard</mode>
@@ -29,6 +29,11 @@
             <product>
                 <url_generation_enabled>1</url_generation_enabled>
             </product>
+            <category>
+                <is_active>1</is_active>
+                <include_in_menu>1</include_in_menu>
+                <is_anchor>1</is_anchor>
+            </category>
         </pimgento>
     </default>
 </config>
