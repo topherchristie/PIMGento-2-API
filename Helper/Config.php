@@ -52,6 +52,9 @@ class Config extends AbstractHelper
     const PRODUCTS_FILTERS_FAMILIES = 'pimgento/products_filters/families';
     const PRODUCTS_FILTERS_UPDATED = 'pimgento/products_filters/updated';
     const PRODUCTS_FILTERS_ADVANCED_FILTER = 'pimgento/products_filters/advanced_filter';
+    const PRODUCTS_CATEGORY_IS_ACTIVE = 'pimgento/category/is_active';
+    const PRODUCTS_CATEGORY_INCLUDE_IN_MENU = 'pimgento/category/include_in_menu';
+    const PRODUCTS_CATEGORY_IS_ANCHOR = 'pimgento/category/is_anchor';
     const PRODUCT_ATTRIBUTE_MAPPING = 'pimgento/product/attribute_mapping';
     const PRODUCT_CONFIGURABLE_ATTRIBUTES = 'pimgento/product/configurable_attributes';
     const PRODUCT_TAX_CLASS = 'pimgento/product/tax_class';
@@ -302,6 +305,36 @@ class Config extends AbstractHelper
         $filters = $this->scopeConfig->getValue(self::PRODUCTS_FILTERS_ADVANCED_FILTER);
 
         return $this->serializer->unserialize($filters);
+    }
+
+    /**
+     * Retrieve the status of imported categories
+     *
+     * @return string
+     */
+    public function getIsCategoryActive()
+    {
+        return $this->scopeConfig->getValue(self::PRODUCTS_CATEGORY_IS_ACTIVE);
+    }
+
+    /**
+     * Retrieve the inclusion in menu of imported categories
+     *
+     * @return string
+     */
+    public function getIsCategoryInMenu()
+    {
+        return $this->scopeConfig->getValue(self::PRODUCTS_CATEGORY_INCLUDE_IN_MENU);
+    }
+
+    /**
+     * Retrieve the anchor state of imported categories
+     *
+     * @return string
+     */
+    public function getIsCategoryAnchor()
+    {
+        return $this->scopeConfig->getValue(self::PRODUCTS_CATEGORY_IS_ANCHOR);
     }
 
     /**

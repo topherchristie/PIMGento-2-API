@@ -29,6 +29,11 @@
             <product>
                 <url_generation_enabled>1</url_generation_enabled>
             </product>
+            <category>
+                <is_active>1</is_active>
+                <include_in_menu>1</include_in_menu>
+                <is_anchor>1</is_anchor>
+            </category>
         </pimgento>
     </default>
 </config>

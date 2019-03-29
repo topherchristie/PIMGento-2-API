@@ -61,3 +61,6 @@ Force attribute code to be lowercase
 Manage attribute scope on import
 
 Fix SQL error when no association column is found using advanced filter
+
+### 100.2.3 :
+Fix undefined offset on product import
