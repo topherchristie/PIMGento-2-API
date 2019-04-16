@@ -275,7 +275,7 @@ class Store extends AbstractHelper
         /** @var string[] $langs */
         $langs = [];
 
-        if (empty($channel) || !in_array($channel, $this->getConfigurationHelper()->getMappedChannels())) {
+        if (empty($channel) || !in_array($channel, $this->configHelper->getMappedChannels())) {
             return $langs;
         }
 

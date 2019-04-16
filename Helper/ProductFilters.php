@@ -155,7 +155,7 @@ class ProductFilters extends Helper
             $locales = $this->storeHelper->getChannelStoreLangs($channel);
             if (!empty($locales)) {
                 /** @var string $locales */
-                $akeneoLocales = $this->localesHelper->getAkeneoLocales();;
+                $akeneoLocales = $this->localesHelper->getAkeneoLocales();
                 if (!empty($akeneoLocales)) {
                     $locales = array_intersect($locales, $akeneoLocales);
                 }
