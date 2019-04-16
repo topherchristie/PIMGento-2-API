@@ -5,7 +5,10 @@ namespace Pimgento\Api\Helper;
 use Akeneo\Pim\ApiClient\Search\SearchBuilder;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
-use \Pimgento\Api\Helper\Config as ConfigHelper;
+use Pimgento\Api\Helper\Data as Helper;
+use Pimgento\Api\Helper\Config as ConfigHelper;
+use Pimgento\Api\Helper\Store as StoreHelper;
+use Pimgento\Api\Helper\Locales as LocalesHelper;
 use Pimgento\Api\Model\Source\Filters\Completeness;
 use Pimgento\Api\Model\Source\Filters\Mode;
 use Pimgento\Api\Model\Source\Filters\Status;
@@ -20,7 +23,7 @@ use Pimgento\Api\Model\Source\Filters\Status;
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  * @link      https://www.pimgento.com/
  */
-class ProductFilters extends AbstractHelper
+class ProductFilters extends Helper
 {
     /**
      * This variable contains a ConfigHelper
@@ -28,6 +31,18 @@ class ProductFilters extends AbstractHelper
      * @var ConfigHelper $configHelper
      */
     protected $configHelper;
+    /**
+     * This variable contains a StoreHelper
+     *
+     * @var StoreHelper $storeHelper
+     */
+    protected $storeHelper;
+    /**
+     * This variable contains a LocaleHelper
+     *
+     * @var Pimgento\Api\Helper\Locales $localesHelper
+     */
+    protected $localesHelper;
     /**
      * This variable contains a SearchBuilder
      *
@@ -38,44 +53,135 @@ class ProductFilters extends AbstractHelper
     /**
      * ProductFilters constructor
      *
-     * @param ConfigHelper $configHelper
+     * @param ConfigHelper  $configHelper
+     * @param Store         $storeHelper
+     * @param Locales       $localesHelper
      * @param SearchBuilder $searchBuilder
-     * @param Context $context
+     * @param Context       $context
      */
     public function __construct(
         ConfigHelper $configHelper,
+        StoreHelper $storeHelper,
+        LocalesHelper $localesHelper,
         SearchBuilder $searchBuilder,
         Context $context
     ) {
         parent::__construct($context);
 
-        $this->configHelper = $configHelper;
+        $this->configHelper  = $configHelper;
+        $this->storeHelper   = $storeHelper;
+        $this->localesHelper = $localesHelper;
         $this->searchBuilder = $searchBuilder;
     }
 
     /**
      * Get the filters for the product API query
      *
-     * @return array
+     * @return mixed[]|string[]
      */
     public function getFilters()
     {
+        /** @var mixed[] $mappedChannels */
+        $mappedChannels = $this->configHelper->getMappedChannels();
+        if (empty($mappedChannels)) {
+            /** @var string[] $error */
+            $error = [
+                'error' => __('No website/channel mapped. Please check your configurations.'),
+            ];
+
+            return $error;
+        }
+
+        /** @var mixed[] $filters */
+        $filters = [];
+        /** @var mixed[] $search */
+        $search = [];
+
         /** @var string $mode */
         $mode = $this->configHelper->getFilterMode();
         if ($mode == Mode::ADVANCED) {
-            return $this->configHelper->getAdvancedFilters();
-        }
-        $this->addCompletenessFilter();
-        $this->addStatusFilter();
-        $this->addFamiliesFilter();
-        $this->addUpdatedFilter();
-        /** @var array $filters */
-        $filters = $this->searchBuilder->getFilters();
-        if (empty($filters)) {
-            return [];
+            /** @var mixed[] $advancedFilters */
+            $advancedFilters = $this->getAdvancedFilters();
+            if (!empty($advancedFilters['scope'])) {
+                if (!in_array($advancedFilters['scope'], $mappedChannels)) {
+                    /** @var string[] $error */
+                    $error = [
+                        'error' => __('Advanced filters contains an unauthorized scope, please add check your filters and website mapping.'),
+                    ];
+
+                    return $error;
+                }
+
+                return [$advancedFilters];
+            }
+
+            $search = $advancedFilters['search'];
         }
 
-        return ['search' => $filters];
+        if ($mode == Mode::STANDARD) {
+            $this->addCompletenessFilter();
+            $this->addStatusFilter();
+            $this->addFamiliesFilter();
+            $this->addUpdatedFilter();
+            $search = $this->searchBuilder->getFilters();
+        }
+
+        /** @var string $channel */
+        foreach ($mappedChannels as $channel) {
+            /** @var string[] $filter */
+            $filter = [
+                'search' => $search,
+                'scope'  => $channel,
+            ];
+
+            if ($mode == Mode::ADVANCED) {
+                $filters[] = $filter;
+
+                continue;
+            }
+
+            if ($this->configHelper->getCompletenessTypeFilter() !== Completeness::NO_CONDITION) {
+                /** @var string[] $completeness */
+                $completeness = reset($search['completeness']);
+                if (!empty($completeness['scope']) && $completeness['scope'] !== $channel) {
+                    $completeness['scope']  = $channel;
+                    $search['completeness'] = [$completeness];
+
+                    $filter['search'] = $search;
+                }
+            }
+
+            /** @var string[] $locales */
+            $locales = $this->storeHelper->getChannelStoreLangs($channel);
+            if (!empty($locales)) {
+                /** @var string $locales */
+                $akeneoLocales = $this->localesHelper->getAkeneoLocales();
+                if (!empty($akeneoLocales)) {
+                    $locales = array_intersect($locales, $akeneoLocales);
+                }
+
+                /** @var string $locales */
+                $locales           = implode(',', $locales);
+                $filter['locales'] = $locales;
+            }
+
+            $filters[] = $filter;
+        }
+
+        return $filters;
+    }
+
+    /**
+     * Retrieve advanced filters config
+     *
+     * @return mixed[]
+     */
+    protected function getAdvancedFilters()
+    {
+        /** @var mixed[] $filters */
+        $filters = $this->configHelper->getAdvancedFilters();
+
+        return $filters;
     }
 
     /**
@@ -90,28 +196,30 @@ class ProductFilters extends AbstractHelper
         if ($filterType === Completeness::NO_CONDITION) {
             return;
         }
+
+        /** @var string $scope */
+        $scope = $this->configHelper->getAdminDefaultChannel();
+        /** @var mixed[] $options */
+        $options = ['scope' => $scope];
+
         /** @var string $filterValue */
         $filterValue = $this->configHelper->getCompletenessValueFilter();
 
-        /** @var mixed $locales */
-        $locales = $this->configHelper->getCompletenessLocalesFilter();
-        $locales = explode(',', $locales);
-
-        /** @var string $scope */
-        $scope = $this->configHelper->getCompletenessScopeFilter();
-
-        $options = ['scope' => $scope];
-
-        /** @var array $localesType */
+        /** @var string[] $localesType */
         $localesType = [
             Completeness::LOWER_OR_EQUALS_THAN_ON_ALL_LOCALES,
             Completeness::LOWER_THAN_ON_ALL_LOCALES,
             Completeness::GREATER_THAN_ON_ALL_LOCALES,
-            Completeness::GREATER_OR_EQUALS_THAN_ON_ALL_LOCALES
+            Completeness::GREATER_OR_EQUALS_THAN_ON_ALL_LOCALES,
         ];
         if (in_array($filterType, $localesType)) {
+            /** @var mixed $locales */
+            $locales = $this->configHelper->getCompletenessLocalesFilter();
+            /** @var string[] $locales */
+            $locales            = explode(',', $locales);
             $options['locales'] = $locales;
         }
+
         $this->searchBuilder->addFilter('completeness', $filterType, $filterValue, $options);
 
         return;
@@ -163,6 +271,8 @@ class ProductFilters extends AbstractHelper
         if (!$filter) {
             return;
         }
+
+        /** @var string[] $filter */
         $filter = explode(',', $filter);
 
         $this->searchBuilder->addFilter('family', 'NOT IN', $filter);

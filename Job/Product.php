@@ -55,7 +55,6 @@ class Product extends Import
      * @var int CONFIGURABLE_INSERTION_MAX_SIZE
      */
     const CONFIGURABLE_INSERTION_MAX_SIZE = 500;
-
     /**
      * This variable contains a string value
      *
@@ -143,6 +142,12 @@ class Product extends Import
      */
     protected $productFilters;
     /**
+     * This variable contains product filters
+     *
+     * @var mixed[] $filters
+     */
+    protected $filters;
+    /**
      * This variable contains a ScopeConfigInterface
      *
      * @var ScopeConfigInterface $scopeConfig
@@ -182,19 +187,19 @@ class Product extends Import
     /**
      * Product constructor.
      *
-     * @param OutputHelper $outputHelper
-     * @param ManagerInterface $eventManager
-     * @param Authenticator $authenticator
-     * @param ProductImportHelper $entitiesHelper
-     * @param ConfigHelper $configHelper
-     * @param ProductFilters $productFilters
-     * @param ScopeConfigInterface $scopeConfig
-     * @param JsonSerializer $serializer
-     * @param ProductModel $product
+     * @param OutputHelper            $outputHelper
+     * @param ManagerInterface        $eventManager
+     * @param Authenticator           $authenticator
+     * @param ProductImportHelper     $entitiesHelper
+     * @param ConfigHelper            $configHelper
+     * @param ProductFilters          $productFilters
+     * @param ScopeConfigInterface    $scopeConfig
+     * @param JsonSerializer          $serializer
+     * @param ProductModel            $product
      * @param ProductUrlPathGenerator $productUrlPathGenerator
-     * @param TypeListInterface $cacheTypeList
-     * @param StoreHelper $storeHelper
-     * @param array $data
+     * @param TypeListInterface       $cacheTypeList
+     * @param StoreHelper             $storeHelper
+     * @param array                   $data
      */
     public function __construct(
         OutputHelper $outputHelper,
@@ -231,10 +236,21 @@ class Product extends Import
      */
     public function createTable()
     {
+        if (empty($this->configHelper->getMappedChannels())) {
+            $this->setMessage(__('No website/channel mapped. Please check your configurations.'));
+            $this->stop(true);
+
+            return;
+        }
+
+        /** @var mixed[] $filters */
+        $filters = $this->getFilters();
+        $filters = reset($filters);
         /** @var PageInterface $products */
-        $products = $this->akeneoClient->getProductApi()->listPerPage(1);
-        /** @var array $products */
+        $products = $this->akeneoClient->getProductApi()->listPerPage(1, false, $filters);
+        /** @var mixed[] $products */
         $products = $products->getItems();
+        $product  = reset($products);
         if (empty($products)) {
             $this->setMessage(__('No results from Akeneo'));
             $this->stop(true);
@@ -242,8 +258,6 @@ class Product extends Import
             return;
         }
 
-        /** @var array $product */
-        $product = reset($products);
         $this->entitiesHelper->createTmpTableFromApi($product, $this->getCode());
     }
 
@@ -254,28 +268,49 @@ class Product extends Import
      */
     public function insertData()
     {
-        /** @var array $filters */
-        $filters = $this->productFilters->getFilters();
         /** @var string|int $paginationSize */
         $paginationSize = $this->configHelper->getPanigationSize();
-        /** @var ResourceCursorInterface $productModels */
-        $products = $this->akeneoClient->getProductApi()->all($paginationSize, $filters);
-        /** @var int $index */
-        $index = 0;
-        /**
-         * @var int $index
-         * @var array $product
-         */
-        foreach ($products as $index => $product) {
-            $this->entitiesHelper->insertDataFromApi($product, $this->getCode());
-        }
-        if ($index) {
-            $index++;
+
+        /** @var int $count */
+        $count = 0;
+        /** @var mixed[] $filters */
+        $filters = $this->getFilters();
+        /** @var mixed[] $filter */
+        foreach ($filters as $filter) {
+            /** @var int $index */
+            $index = 0;
+            /** @var Akeneo\Pim\ApiClient\Pagination\ResourceCursorInterface $products */
+            $products = $this->akeneoClient->getProductApi()->all($paginationSize, $filter);
+            /**
+             * @var int     $index
+             * @var mixed[] $product
+             */
+            foreach ($products as $index => $product) {
+                /** @var bool $result */
+                $result = $this->entitiesHelper->insertDataFromApi($product, $this->getCode());
+                if (!$result) {
+                    $this->setMessage('Could not insert Product data in temp table');
+                    $this->stop(true);
+
+                    return;
+                }
+            }
+
+            if ($index) {
+                $count = $index;
+            }
         }
 
-        $this->setMessage(
-            __('%1 line(s) found', $index)
-        );
+        if (empty($count)) {
+            $this->setMessage('No Product data to insert in temp table');
+            $this->stop(true);
+
+            return;
+        }
+
+        $count++;
+
+        $this->setMessage(__('%1 line(s) found', $count));
     }
 
     /**
@@ -291,57 +326,85 @@ class Product extends Import
         /** @var string $tmpTable */
         $tmpTable = $this->entitiesHelper->getTableName($this->getCode());
 
-        $connection->addColumn($tmpTable, '_type_id', [
-            'type' => 'text',
-            'length' => 255,
-            'default' => 'simple',
-            'COMMENT' => ' ',
-            'nullable' => false
-        ]);
-        $connection->addColumn($tmpTable, '_options_container', [
-            'type' => 'text',
-            'length' => 255,
-            'default' => 'container2',
-            'COMMENT' => ' ',
-            'nullable' => false
-        ]);
-        $connection->addColumn($tmpTable, '_tax_class_id', [
-            'type' => 'integer',
-            'length' => 11,
-            'default' => 0,
-            'COMMENT' => ' ',
-            'nullable' => false
-        ]); // None
-        $connection->addColumn($tmpTable, '_attribute_set_id', [
-            'type' => 'integer',
-            'length' => 11,
-            'default' => 4,
-            'COMMENT' => ' ',
-            'nullable' => false
-        ]); // Default
-        $connection->addColumn($tmpTable, '_visibility', [
-            'type' => 'integer',
-            'length' => 11,
-            'default' => Visibility::VISIBILITY_BOTH,
-            'COMMENT' => ' ',
-            'nullable' => false
-        ]);
-        $connection->addColumn($tmpTable, '_status', [
-            'type' => 'integer',
-            'length' => 11,
-            'default' => 2,
-            'COMMENT' => ' ',
-            'nullable' => false
-        ]); // Disabled
+        $connection->addColumn(
+            $tmpTable,
+            '_type_id',
+            [
+                'type'     => 'text',
+                'length'   => 255,
+                'default'  => 'simple',
+                'COMMENT'  => ' ',
+                'nullable' => false,
+            ]
+        );
+        $connection->addColumn(
+            $tmpTable,
+            '_options_container',
+            [
+                'type'     => 'text',
+                'length'   => 255,
+                'default'  => 'container2',
+                'COMMENT'  => ' ',
+                'nullable' => false,
+            ]
+        );
+        $connection->addColumn(
+            $tmpTable,
+            '_tax_class_id',
+            [
+                'type'     => 'integer',
+                'length'   => 11,
+                'default'  => 0,
+                'COMMENT'  => ' ',
+                'nullable' => false,
+            ]
+        ); // None
+        $connection->addColumn(
+            $tmpTable,
+            '_attribute_set_id',
+            [
+                'type'     => 'integer',
+                'length'   => 11,
+                'default'  => 4,
+                'COMMENT'  => ' ',
+                'nullable' => false,
+            ]
+        ); // Default
+        $connection->addColumn(
+            $tmpTable,
+            '_visibility',
+            [
+                'type'     => 'integer',
+                'length'   => 11,
+                'default'  => Visibility::VISIBILITY_BOTH,
+                'COMMENT'  => ' ',
+                'nullable' => false,
+            ]
+        );
+        $connection->addColumn(
+            $tmpTable,
+            '_status',
+            [
+                'type'     => 'integer',
+                'length'   => 11,
+                'default'  => 2,
+                'COMMENT'  => ' ',
+                'nullable' => false,
+            ]
+        ); // Disabled
 
         if (!$connection->tableColumnExists($tmpTable, 'url_key') && $this->configHelper->isUrlGenerationEnabled()) {
-            $connection->addColumn($tmpTable, 'url_key', [
-                'type' => 'text',
-                'length' => 255,
-                'default' => '',
-                'COMMENT' => ' ',
-                'nullable' => false
-            ]);
+            $connection->addColumn(
+                $tmpTable,
+                'url_key',
+                [
+                    'type'     => 'text',
+                    'length'   => 255,
+                    'default'  => '',
+                    'COMMENT'  => ' ',
+                    'nullable' => false,
+                ]
+            );
             $connection->update($tmpTable, ['url_key' => new Expr('LOWER(`identifier`)')]);
         }
 
@@ -446,12 +509,15 @@ class Product extends Import
         }
 
         $connection->addColumn($tmpTable, '_children', 'text');
-        $connection->addColumn($tmpTable, '_axis', [
-            'type' => 'text',
-            'length' => 255,
-            'default' => '',
-            'COMMENT' => ' '
-        ]
+        $connection->addColumn(
+            $tmpTable,
+            '_axis',
+            [
+                'type'    => 'text',
+                'length'  => 255,
+                'default' => '',
+                'COMMENT' => ' ',
+            ]
         );
 
         /** @var string $productModelTable */
@@ -590,10 +656,7 @@ class Product extends Import
 
         /** @var array $duplicates */
         $duplicates = $connection->fetchCol(
-            $connection->select()
-                ->from($tmpTable, ['identifier'])
-                ->group('identifier')
-                ->having('COUNT(identifier) > ?', 1)
+            $connection->select()->from($tmpTable, ['identifier'])->group('identifier')->having('COUNT(identifier) > ?', 1)
         );
 
         if (!empty($duplicates)) {
@@ -625,7 +688,7 @@ class Product extends Import
         /** @var string $tmpTable */
         $tmpTable = $this->entitiesHelper->getTableName($this->getCode());
 
-        if (!$connection->tableColumnExists($tmpTable,'family')) {
+        if (!$connection->tableColumnExists($tmpTable, 'family')) {
             $this->setStatus(false);
             $this->setMessage(__('Column family is missing'));
 
@@ -635,9 +698,7 @@ class Product extends Import
         /** @var string $entitiesTable */
         $entitiesTable = $this->entitiesHelper->getTable('pimgento_entities');
         /** @var Select $families */
-        $families = $connection->select()
-            ->from(false, ['_attribute_set_id' => 'c.entity_id'])
-            ->joinLeft(['c' => $entitiesTable],'p.family = c.code AND c.import = "family"', []);
+        $families = $connection->select()->from(false, ['_attribute_set_id' => 'c.entity_id'])->joinLeft(['c' => $entitiesTable], 'p.family = c.code AND c.import = "family"', []);
 
         $connection->query($connection->updateFromSelect($families, ['p' => $tmpTable]));
 
@@ -711,20 +772,19 @@ class Product extends Import
 
             //in case of multiselect
             /** @var string $conditionJoin */
-            $conditionJoin = "IF ( locate(',', `".$column."`) > 0 , " . "`p`.`" . $column . "` like " . new Expr(
+            $conditionJoin = "IF ( locate(',', `" . $column . "`) > 0 , " . "`p`.`" . $column . "` like " . new Expr(
                     "CONCAT('%', `c1`.`code`, '%')"
                 ) . ", `p`.`" . $column . "` = `c1`.`code` )";
 
             /** @var Select $select */
-            $select = $connection->select()
-                ->from(
-                    ['p' => $tmpTable],
-                    ['identifier' => 'p.identifier', 'entity_id' => 'p._entity_id']
-                )->joinInner(
-                    ['c1' => new Expr('(' . (string)$subSelect . ')')],
-                    new Expr($conditionJoin),
-                    [$column => new Expr('GROUP_CONCAT(`c1`.`entity_id` SEPARATOR ",")')]
-                )->group('p.identifier');
+            $select = $connection->select()->from(
+                ['p' => $tmpTable],
+                ['identifier' => 'p.identifier', 'entity_id' => 'p._entity_id']
+            )->joinInner(
+                ['c1' => new Expr('(' . (string)$subSelect . ')')],
+                new Expr($conditionJoin),
+                [$column => new Expr('GROUP_CONCAT(`c1`.`entity_id` SEPARATOR ",")')]
+            )->group('p.identifier');
 
             /** @var string $query */
             $query = $connection->insertFromSelect(
@@ -752,7 +812,7 @@ class Product extends Import
 
         if ($connection->isTableExists($this->entitiesHelper->getTable('sequence_product'))) {
             /** @var array $values */
-            $values  = ['sequence_value' => '_entity_id'];
+            $values = ['sequence_value' => '_entity_id'];
             /** @var Select $parents */
             $parents = $connection->select()->from($tmpTable, $values);
             /** @var string $query */
@@ -828,8 +888,7 @@ class Product extends Import
         $columns = array_keys($connection->describeTable($tmpTable));
 
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $helper = $objectManager->get('\Magento\Directory\Helper\Data');
-
+        $helper        = $objectManager->get('\Magento\Directory\Helper\Data');
 
         /** @var string $adminBaseCurrency */
         $adminBaseCurrency = $helper->getBaseCurrencyCode();
@@ -879,7 +938,7 @@ class Product extends Import
 
             /** @var int $scope */
             $scope = (int)$attributeScopeMapping[$columnPrefix];
-            if ($scope === \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL && !empty($columnParts[1]) && $columnParts[1] === $adminBaseCurrency){
+            if ($scope === \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL && !empty($columnParts[1]) && $columnParts[1] === $adminBaseCurrency) {
                 // This attribute has global scope with a suffix: it is a price with its currency
                 // If Price scope is set to Website, it will be processed afterwards as any website scoped attribute
                 $values[0][$columnPrefix] = $column;
@@ -922,7 +981,7 @@ class Product extends Import
         $entityTypeId = $this->configHelper->getEntityTypeId(ProductModel::ENTITY);
 
         /**
-         * @var string $storeId
+         * @var string   $storeId
          * @var string[] $data
          */
         foreach ($values as $storeId => $data) {
@@ -967,11 +1026,9 @@ class Product extends Import
         }
 
         /** @var Select $configurableSelect */
-        $configurableSelect = $connection->select()
-            ->from($tmpTable, ['_entity_id', '_axis','_children'])
-            ->where('_type_id = ?','configurable')
-            ->where('_axis IS NOT NULL')
-            ->where('_children IS NOT NULL');
+        $configurableSelect = $connection->select()->from($tmpTable, ['_entity_id', '_axis', '_children'])->where('_type_id = ?', 'configurable')->where('_axis IS NOT NULL')->where(
+            '_children IS NOT NULL'
+        );
 
         /** @var int $stepSize */
         $stepSize = self::CONFIGURABLE_INSERTION_MAX_SIZE;
@@ -1005,10 +1062,7 @@ class Product extends Import
 
                 /** @var bool $hasOptions */
                 $hasOptions = (bool)$connection->fetchOne(
-                    $connection->select()
-                        ->from($this->entitiesHelper->getTable('eav_attribute_option'), [new Expr(1)])
-                        ->where('attribute_id = ?', $id)
-                        ->limit(1)
+                    $connection->select()->from($this->entitiesHelper->getTable('eav_attribute_option'), [new Expr(1)])->where('attribute_id = ?', $id)->limit(1)
                 );
 
                 if (!$hasOptions) {
@@ -1029,15 +1083,13 @@ class Product extends Import
 
                 /** @var string $superAttributeId */
                 $superAttributeId = $connection->fetchOne(
-                    $connection->select()
-                        ->from($this->entitiesHelper->getTable('catalog_product_super_attribute'))
-                        ->where('attribute_id = ?', $id)
-                        ->where('product_id = ?', $row['_entity_id'])
-                        ->limit(1)
+                    $connection->select()->from($this->entitiesHelper->getTable('catalog_product_super_attribute'))->where('attribute_id = ?', $id)->where('product_id = ?', $row['_entity_id'])->limit(
+                        1
+                    )
                 );
 
                 /**
-                 * @var int $storeId
+                 * @var int   $storeId
                  * @var array $affected
                  */
                 foreach ($stores as $storeId => $affected) {
@@ -1055,10 +1107,7 @@ class Product extends Import
                 foreach ($children as $child) {
                     /** @var int $childId */
                     $childId = (int)$connection->fetchOne(
-                        $connection->select()
-                            ->from($this->entitiesHelper->getTable('catalog_product_entity'), ['entity_id'])
-                            ->where('sku = ?', $child)
-                            ->limit(1)
+                        $connection->select()->from($this->entitiesHelper->getTable('catalog_product_entity'), ['entity_id'])->where('sku = ?', $child)->limit(1)
                     );
 
                     if (!$childId) {
@@ -1139,7 +1188,7 @@ class Product extends Import
         $websites = $this->storeHelper->getStores('website_id');
 
         /**
-         * @var int $websiteId
+         * @var int   $websiteId
          * @var array $affected
          */
         foreach ($websites as $websiteId => $affected) {
@@ -1187,20 +1236,18 @@ class Product extends Import
         }
 
         /** @var Select $select */
-        $select = $connection->select()
-            ->from(['c' => $this->entitiesHelper->getTable('pimgento_entities')], [])
-            ->joinInner(
-                ['p' => $tmpTable],
-                'FIND_IN_SET(`c`.`code`, `p`.`categories`) AND `c`.`import` = "category"',
-                [
-                    'category_id' => 'c.entity_id',
-                    'product_id'  => 'p._entity_id',
-                ])
-            ->joinInner(
-                ['e' => $this->entitiesHelper->getTable('catalog_category_entity')],
-                'c.entity_id = e.entity_id',
-                []
-            );
+        $select = $connection->select()->from(['c' => $this->entitiesHelper->getTable('pimgento_entities')], [])->joinInner(
+            ['p' => $tmpTable],
+            'FIND_IN_SET(`c`.`code`, `p`.`categories`) AND `c`.`import` = "category"',
+            [
+                'category_id' => 'c.entity_id',
+                'product_id'  => 'p._entity_id',
+            ]
+        )->joinInner(
+            ['e' => $this->entitiesHelper->getTable('catalog_category_entity')],
+            'c.entity_id = e.entity_id',
+            []
+        );
 
         $connection->query(
             $connection->insertFromSelect(
@@ -1212,20 +1259,18 @@ class Product extends Import
         );
 
         /** @var Select $selectToDelete */
-        $selectToDelete = $connection->select()
-            ->from(['c' => $this->entitiesHelper->getTable('pimgento_entities')], [])
-            ->joinInner(
-                ['p' => $tmpTable],
-                '!FIND_IN_SET(`c`.`code`, `p`.`categories`) AND `c`.`import` = "category"',
-                [
-                    'category_id' => 'c.entity_id',
-                    'product_id'  => 'p._entity_id',
-                ])
-            ->joinInner(
-                ['e' => $this->entitiesHelper->getTable('catalog_category_entity')],
-                'c.entity_id = e.entity_id',
-                []
-            );
+        $selectToDelete = $connection->select()->from(['c' => $this->entitiesHelper->getTable('pimgento_entities')], [])->joinInner(
+            ['p' => $tmpTable],
+            '!FIND_IN_SET(`c`.`code`, `p`.`categories`) AND `c`.`import` = "category"',
+            [
+                'category_id' => 'c.entity_id',
+                'product_id'  => 'p._entity_id',
+            ]
+        )->joinInner(
+            ['e' => $this->entitiesHelper->getTable('catalog_category_entity')],
+            'c.entity_id = e.entity_id',
+            []
+        );
 
         $connection->delete(
             $this->entitiesHelper->getTable('catalog_category_product'),
@@ -1346,16 +1391,11 @@ class Product extends Import
 
             /* Insert position */
             $attributeId = $connection->fetchOne(
-                $connection->select()
-                    ->from($linkAttributeTable, ['product_link_attribute_id'])
-                    ->where('product_link_attribute_code = ?', ProductLink::KEY_POSITION)
-                    ->where('link_type_id = ?', $typeId)
+                $connection->select()->from($linkAttributeTable, ['product_link_attribute_id'])->where('product_link_attribute_code = ?', ProductLink::KEY_POSITION)->where('link_type_id = ?', $typeId)
             );
 
             if ($attributeId) {
-                $select = $connection->select()
-                    ->from($linkTable, [new Expr($attributeId), 'link_id', 'link_id'])
-                    ->where('link_type_id = ?', $typeId);
+                $select = $connection->select()->from($linkTable, [new Expr($attributeId), 'link_id', 'link_id'])->where('link_type_id = ?', $typeId);
 
                 $connection->query(
                     $connection->insertFromSelect(
@@ -1401,7 +1441,7 @@ class Product extends Import
 
         /**
          * @var string $local
-         * @var array $affected
+         * @var array  $affected
          */
         foreach ($stores as $local => $affected) {
             if (!$isUrlKeyMapped && !$connection->tableColumnExists($tmpTable, 'url_key-' . $local)) {
@@ -1409,11 +1449,11 @@ class Product extends Import
                     $tmpTable,
                     'url_key-' . $local,
                     [
-                        'type' => 'text',
-                        'length' => 255,
-                        'default' => '',
-                        'COMMENT' => ' ',
-                        'nullable' => false
+                        'type'     => 'text',
+                        'length'   => 255,
+                        'default'  => '',
+                        'COMMENT'  => ' ',
+                        'nullable' => false,
                     ]
                 );
                 $connection->update($tmpTable, ['url_key-' . $local => new Expr('`url_key`')]);
@@ -1428,15 +1468,14 @@ class Product extends Import
                     continue;
                 }
                 /** @var \Magento\Framework\DB\Select $select */
-                $select = $connection->select()
-                    ->from(
-                        $tmpTable,
-                        [
-                            'entity_id' => '_entity_id',
-                            'url_key'   => 'url_key-' . $local,
-                            'store_id'  => new Expr($store['store_id']),
-                        ]
-                    );
+                $select = $connection->select()->from(
+                    $tmpTable,
+                    [
+                        'entity_id' => '_entity_id',
+                        'url_key'   => 'url_key-' . $local,
+                        'store_id'  => new Expr($store['store_id']),
+                    ]
+                );
 
                 /** @var \Magento\Framework\DB\Statement\Pdo\Mysql $query */
                 $query = $connection->query($select);
@@ -1462,12 +1501,10 @@ class Product extends Import
 
                     /** @var string|null $exists */
                     $exists = $connection->fetchOne(
-                        $connection->select()
-                            ->from($this->entitiesHelper->getTable('url_rewrite'), new Expr(1))
-                            ->where('entity_type = ?', ProductUrlRewriteGenerator::ENTITY_TYPE)
-                            ->where('request_path = ?', $requestPath)
-                            ->where('store_id = ?', $product->getStoreId())
-                            ->where('entity_id <> ?', $product->getEntityId())
+                        $connection->select()->from($this->entitiesHelper->getTable('url_rewrite'), new Expr(1))->where('entity_type = ?', ProductUrlRewriteGenerator::ENTITY_TYPE)->where(
+                            'request_path = ?',
+                            $requestPath
+                        )->where('store_id = ?', $product->getStoreId())->where('entity_id <> ?', $product->getEntityId())
                     );
                     if ($exists) {
                         $product->setUrlKey($product->getUrlKey() . '-' . $product->getStoreId());
@@ -1485,7 +1522,7 @@ class Product extends Import
                             'target_path'  => 'catalog/product/view/id/' . $product->getEntityId(),
                             'metadata'     => null,
                             'category_id'  => null,
-                        ]
+                        ],
                     ];
 
                     /** @var bool $isCategoryUsedInProductUrl */
@@ -1501,7 +1538,7 @@ class Product extends Import
                         /** @var CategoryModel $category */
                         foreach ($categories as $category) {
                             /** @var string $requestPath */
-                            $requestPath = $this->productUrlPathGenerator->getUrlPathWithSuffix(
+                            $requestPath         = $this->productUrlPathGenerator->getUrlPathWithSuffix(
                                 $product,
                                 $product->getStoreId(),
                                 $category
@@ -1512,7 +1549,7 @@ class Product extends Import
                                 'metadata'     => '{"category_id":"' . $category->getId() . '"}',
                                 'category_id'  => $category->getId(),
                             ];
-                            $parents = $category->getParentCategories();
+                            $parents             = $category->getParentCategories();
                             foreach ($parents as $parent) {
                                 /** @var string $requestPath */
                                 $requestPath = $this->productUrlPathGenerator->getUrlPathWithSuffix(
@@ -1546,12 +1583,10 @@ class Product extends Import
 
                         /** @var string|null $rewriteId */
                         $rewriteId = $connection->fetchOne(
-                            $connection->select()
-                                ->from($this->entitiesHelper->getTable('url_rewrite'), ['url_rewrite_id'])
-                                ->where('entity_type = ?', ProductUrlRewriteGenerator::ENTITY_TYPE)
-                                ->where('target_path = ?', $targetPath)
-                                ->where('entity_id = ?', $product->getEntityId())
-                                ->where('store_id = ?', $product->getStoreId())
+                            $connection->select()->from($this->entitiesHelper->getTable('url_rewrite'), ['url_rewrite_id'])->where('entity_type = ?', ProductUrlRewriteGenerator::ENTITY_TYPE)->where(
+                                'target_path = ?',
+                                $targetPath
+                            )->where('entity_id = ?', $product->getEntityId())->where('store_id = ?', $product->getStoreId())
                         );
 
                         if ($rewriteId) {
@@ -1563,14 +1598,14 @@ class Product extends Import
                         } else {
                             /** @var array $data */
                             $data = [
-                                'entity_type' => ProductUrlRewriteGenerator::ENTITY_TYPE,
-                                'entity_id' => $product->getEntityId(),
-                                'request_path' => $requestPath,
-                                'target_path' => $targetPath,
-                                'redirect_type' => 0,
-                                'store_id' => $product->getStoreId(),
+                                'entity_type'      => ProductUrlRewriteGenerator::ENTITY_TYPE,
+                                'entity_id'        => $product->getEntityId(),
+                                'request_path'     => $requestPath,
+                                'target_path'      => $targetPath,
+                                'redirect_type'    => 0,
+                                'store_id'         => $product->getStoreId(),
                                 'is_autogenerated' => 1,
-                                'metadata' => $metadata,
+                                'metadata'         => $metadata,
                             ];
 
                             $connection->insertOnDuplicate(
@@ -1596,7 +1631,7 @@ class Product extends Import
                             $data = [
                                 'url_rewrite_id' => $rewriteId,
                                 'category_id'    => $path['category_id'],
-                                'product_id'     => $product->getEntityId()
+                                'product_id'     => $product->getEntityId(),
                             ];
                             $connection->delete(
                                 $this->entitiesHelper->getTable('catalog_url_rewrite_product_category'),
@@ -1691,7 +1726,7 @@ class Product extends Import
                 /** @var array $media */
                 $media = $this->akeneoClient->getProductMediaFileApi()->get($row[$image]);
                 /** @var string $name */
-                $name  = basename($media['code']);
+                $name = basename($media['code']);
 
                 if (!$this->configHelper->mediaFileExists($name)) {
                     $binary = $this->akeneoClient->getProductMediaFileApi()->download($row[$image]);
@@ -1703,9 +1738,7 @@ class Product extends Import
 
                 /** @var int $valueId */
                 $valueId = $connection->fetchOne(
-                    $connection->select()
-                    ->from($galleryTable, ['value_id'])
-                    ->where('value = ?', $file)
+                    $connection->select()->from($galleryTable, ['value_id'])->where('value = ?', $file)
                 );
 
                 if (!$valueId) {
@@ -1727,9 +1760,9 @@ class Product extends Import
                 $connection->insertOnDuplicate($galleryTable, $data, array_keys($data));
 
                 /** @var array $data */
-                $data =  [
+                $data = [
                     'value_id'        => $valueId,
-                    $columnIdentifier => $row[$columnIdentifier]
+                    $columnIdentifier => $row[$columnIdentifier],
                 ];
                 $connection->insertOnDuplicate($galleryEntityTable, $data, array_keys($data));
 
@@ -1745,7 +1778,7 @@ class Product extends Import
                         'attribute_id'    => $column['attribute'],
                         'store_id'        => 0,
                         $columnIdentifier => $row[$columnIdentifier],
-                        'value'           => $file
+                        'value'           => $file,
                     ];
                     $connection->insertOnDuplicate($productImageTable, $data, array_keys($data));
                 }
@@ -1754,15 +1787,13 @@ class Product extends Import
             }
 
             /** @var \Magento\Framework\DB\Select $cleaner */
-            $cleaner = $connection->select()
-                ->from($galleryTable, ['value_id'])
-                ->where('value NOT IN (?)', $files);
+            $cleaner = $connection->select()->from($galleryTable, ['value_id'])->where('value NOT IN (?)', $files);
 
             $connection->delete(
                 $galleryEntityTable,
                 [
                     'value_id IN (?)'          => $cleaner,
-                    $columnIdentifier . ' = ?' => $row[$columnIdentifier]
+                    $columnIdentifier . ' = ?' => $row[$columnIdentifier],
                 ]
             );
         }
@@ -1872,11 +1903,9 @@ class Product extends Import
 
                     if (!$this->configHelper->mediaFileExists($name)) {
                         if ($reference['locale']) {
-                            $binary = $this->akeneoClient->getAssetReferenceFileApi()
-                                ->downloadFromLocalizableAsset($media['code'], $reference['locale']);
+                            $binary = $this->akeneoClient->getAssetReferenceFileApi()->downloadFromLocalizableAsset($media['code'], $reference['locale']);
                         } else {
-                            $binary = $this->akeneoClient->getAssetReferenceFileApi()
-                                ->downloadFromNotLocalizableAsset($media['code']);
+                            $binary = $this->akeneoClient->getAssetReferenceFileApi()->downloadFromNotLocalizableAsset($media['code']);
                         }
                         $this->configHelper->saveMediaFile($name, $binary);
                     }
@@ -1886,9 +1915,7 @@ class Product extends Import
 
                     /** @var int $valueId */
                     $valueId = $connection->fetchOne(
-                        $connection->select()
-                            ->from($galleryTable, ['value_id'])
-                            ->where('value = ?', $file)
+                        $connection->select()->from($galleryTable, ['value_id'])->where('value = ?', $file)
                     );
 
                     if (!$valueId) {
@@ -1901,18 +1928,18 @@ class Product extends Import
 
                     /** @var array $data */
                     $data = [
-                        'value_id' => $valueId,
+                        'value_id'     => $valueId,
                         'attribute_id' => $galleryAttribute->getId(),
-                        'value' => $file,
-                        'media_type' => ImageEntryConverter::MEDIA_TYPE_CODE,
-                        'disabled' => 0,
+                        'value'        => $file,
+                        'media_type'   => ImageEntryConverter::MEDIA_TYPE_CODE,
+                        'disabled'     => 0,
                     ];
                     $connection->insertOnDuplicate($galleryTable, $data, array_keys($data));
 
                     /** @var array $data */
                     $data = [
                         'value_id'        => $valueId,
-                        $columnIdentifier => $row[$columnIdentifier]
+                        $columnIdentifier => $row[$columnIdentifier],
                     ];
                     $connection->insertOnDuplicate($galleryEntityTable, $data, array_keys($data));
 
@@ -1944,7 +1971,7 @@ class Product extends Import
                                 'attribute_id'    => $attribute->getId(),
                                 'store_id'        => 0,
                                 $columnIdentifier => $row[$columnIdentifier],
-                                'value'           => $file
+                                'value'           => $file,
                             ];
                             $connection->insertOnDuplicate($productImageTable, $data, array_keys($data));
                         }
@@ -1955,15 +1982,13 @@ class Product extends Import
             }
 
             /** @var \Magento\Framework\DB\Select $cleaner */
-            $cleaner = $connection->select()
-                ->from($galleryTable, ['value_id'])
-                ->where('value NOT IN (?)', $files);
+            $cleaner = $connection->select()->from($galleryTable, ['value_id'])->where('value NOT IN (?)', $files);
 
             $connection->delete(
                 $galleryEntityTable,
                 [
                     'value_id IN (?)'          => $cleaner,
-                    $columnIdentifier . ' = ?' => $row[$columnIdentifier]
+                    $columnIdentifier . ' = ?' => $row[$columnIdentifier],
                 ]
             );
         }
@@ -2000,4 +2025,24 @@ class Product extends Import
         $this->setMessage(__('Cache cleaned for: %1', join(', ', $types)));
     }
 
+    /**
+     * Retrieve product filters
+     *
+     * @return mixed[]
+     */
+    protected function getFilters()
+    {
+        if (empty($this->filters)) {
+            /** @var mixed[] $filters */
+            $filters = $this->productFilters->getFilters();
+            if (array_key_exists('error', $filters)) {
+                $this->setMessage($filters['error']);
+                $this->stop(true);
+            }
+
+            $this->filters = $filters;
+        }
+
+        return $this->filters;
+    }
 }

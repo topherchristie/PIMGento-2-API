@@ -187,6 +187,23 @@ class Entities extends AbstractHelper
         /* Create new table */
         /** @var Table $table */
         $table = $this->connection->newTable($tableName);
+
+        $fields = array_diff($fields, ['identifier']);
+
+        $table->addColumn(
+            'identifier',
+            Table::TYPE_VARBINARY,
+            255,
+            [],
+            'identifier'
+        );
+
+        $table->addIndex(
+            'UNIQUE_IDENTIFIER',
+            'identifier',
+            ['type' => AdapterInterface::INDEX_TYPE_UNIQUE]
+        );
+
         /** @var string $field */
         foreach ($fields as $field) {
             if ($field) {
@@ -194,7 +211,7 @@ class Entities extends AbstractHelper
                 $column = $this->formatColumn($field);
                 $table->addColumn(
                     $column,
-                    \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    Table::TYPE_TEXT,
                     null,
                     [],
                     $column
@@ -204,7 +221,7 @@ class Entities extends AbstractHelper
 
         $table->addColumn(
             '_entity_id',
-            \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER,
+            Table::TYPE_INTEGER,
             11,
             [],
             'Entity Id'
@@ -213,12 +230,12 @@ class Entities extends AbstractHelper
         $table->addIndex(
             'UNIQUE_ENTITY_ID',
             '_entity_id',
-            ['type' => \Magento\Framework\DB\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE]
+            ['type' => AdapterInterface::INDEX_TYPE_UNIQUE]
         );
 
         $table->addColumn(
             '_is_new',
-            \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+            Table::TYPE_SMALLINT,
             1,
             ['default' => 0],
             'Is New'
@@ -309,22 +326,30 @@ class Entities extends AbstractHelper
     /**
      * Insert data in the temporary table
      *
-     * @param array $result
+     * @param array       $result
      * @param null|string $tableSuffix
-     * @param int $queryNumber
      *
-     * @return void
+     * @return bool
      */
-    public function insertDataFromApi(array $result, $tableSuffix = null, $queryNumber = 1000)
+    public function insertDataFromApi(array $result, $tableSuffix = null)
     {
+        if (empty($result)) {
+            return false;
+        }
+
         /** @var string $tableName */
         $tableName = $this->getTableName($tableSuffix);
 
         /** @var string[] $result */
         $result = $this->getColumnsFromResult($result);
+
+        /** @var string[] $fields */
+        $fields = array_diff_key($result, ['identifier' => null]);
+        $fields = array_keys($fields);
+
         /**
          * @var string $key
-         * @var $string $value
+         * @var        $string $value
          */
         foreach ($result as $key => $value) {
             if (!$this->connection->tableColumnExists($tableName, $key)) {
@@ -332,7 +357,9 @@ class Entities extends AbstractHelper
             }
         }
 
-        $this->connection->insert($tableName, $result);
+        $this->connection->insertOnDuplicate($tableName, $result, $fields);
+
+        return true;
     }
 
     /**
