@@ -140,7 +140,7 @@ class ProductFilters extends Helper
                 continue;
             }
 
-            if ($this->configHelper->getCompletenessTypeFilter() === Completeness::NO_CONDITION) {
+            if ($this->configHelper->getCompletenessTypeFilter() !== Completeness::NO_CONDITION) {
                 /** @var string[] $completeness */
                 $completeness = reset($search['completeness']);
                 if (!empty($completeness['scope']) && $completeness['scope'] !== $channel) {
