@@ -73,3 +73,6 @@ Change wording for advanced JSON configuration
 Add SQL statement possibility in configurable mapping
 
 Add category configurations for anchor, status and display in menu
+
+### 100.2.5 :
+Refactor API requests from configured mapping to improve performance and reduce data inserted in temporary table
