@@ -29,6 +29,9 @@
             <product>
                 <url_generation_enabled>1</url_generation_enabled>
             </product>
+            <products_filters>
+                <updated_mode>SINCE LAST N DAYS</updated_mode>
+            </products_filters>
             <category>
                 <is_active>1</is_active>
                 <include_in_menu>1</include_in_menu>
