@@ -16,6 +16,13 @@
             <label>Pimgento</label>
             <tab>catalog</tab>
             <resource>Pimgento_Import::config_pimgento</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1">
+                <label>General</label>
+                <field id="version" translate="label" type="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Extension Version</label>
+                    <backend_model>Pimgento\Api\Model\Config\Version</backend_model>
+                </field>
+            </group>
             <group id="akeneo_api" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Akeneo API Configuration</label>
                 <field id="base_url" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
