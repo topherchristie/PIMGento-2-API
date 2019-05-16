@@ -121,6 +121,7 @@
                     <depends>
                         <field id="mode">standard</field>
                     </depends>
+                    <can_be_empty>1</can_be_empty>
                 </field>
                 <field id="advanced_filter" translate="label comment" type="textarea" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Advanced Filter</label>
