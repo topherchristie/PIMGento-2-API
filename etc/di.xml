@@ -122,6 +122,7 @@
                     </item>
                 </item>
             </argument>
+            <argument name="class" xsi:type="object">Pimgento\Api\Helper\Store</argument>
         </arguments>
     </type>
 

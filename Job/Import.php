@@ -523,4 +523,26 @@ abstract class Import extends DataObject implements ImportInterface
     {
         return $this->isEnterprise;
     }
+
+    /**
+     * Check if all locales labels exists
+     *
+     * @param string[] $entity
+     * @param string[] $lang
+     * @param string $response
+     *
+     * @return string
+     */
+    public function checkLabelPerLocales(array $entity, array $lang, string $response): string
+    {
+        /** @var string[] $labels */
+        $labels = $entity['labels'];
+        foreach ($lang as $locale => $stores) {
+            if (empty($labels[$locale])) {
+                $response .= __("Label for '%1' in %2 is missing. ", $entity['code'], $locale);
+            }
+        }
+
+        return $response;
+    }
 }
