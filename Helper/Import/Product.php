@@ -207,31 +207,4 @@ class Product extends Entities
 
         return (string)$key;
     }
-
-    /**
-     * Set prefix to lower case
-     * to avoid problems with values import
-     *
-     * @param string[] $values
-     *
-     * @return string[]
-     */
-    public function prefixToLowerCase($values)
-    {
-        /** @var string[] $newValues */
-        $newValues = [];
-        foreach ($values as $key => $data) {
-            /** @var string[] $keyParts */
-            $keyParts    = explode('-', $key, 2);
-            $keyParts[0] = strtolower($keyParts[0]);
-
-            if (count($keyParts) > 1) {
-                $newValues[$keyParts[0].'-'.$keyParts[1]] = $data;
-            } else {
-                $newValues[$keyParts[0]] = $data;
-            }
-        }
-
-        return $newValues;
-    }
 }
