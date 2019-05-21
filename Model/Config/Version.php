@@ -17,10 +17,6 @@ use Magento\Framework\App\Config\Value;
 class Version extends Value
 {
     /**
-     * @var \Magento\Framework\Module\ResourceInterface
-     */
-    protected $moduleResource;
-    /**
      * @var \Magento\Framework\Component\ComponentRegistrarInterface
      */
     protected $componentRegistrar;
@@ -36,24 +32,22 @@ class Version extends Value
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $config
      * @param \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList
-     * @param \Magento\Framework\Module\ResourceInterface $moduleResource
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
-     * @param array $data
      * @param \Magento\Framework\Component\ComponentRegistrarInterface $componentRegistrar
      * @param \Magento\Framework\Filesystem\Directory\ReadFactory $readFactory
+     * @param array $data
      */
     public function __construct(
         \Magento\Framework\Model\Context $context,
         \Magento\Framework\Registry $registry,
         \Magento\Framework\App\Config\ScopeConfigInterface $config,
         \Magento\Framework\App\Cache\TypeListInterface $cacheTypeList,
-        \Magento\Framework\Module\ResourceInterface $moduleResource,
-        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
-        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-        array $data = [],
+        \Magento\Framework\Model\ResourceModel\AbstractResource $resource,
+        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection,
         \Magento\Framework\Component\ComponentRegistrarInterface $componentRegistrar,
-        \Magento\Framework\Filesystem\Directory\ReadFactory $readFactory
+        \Magento\Framework\Filesystem\Directory\ReadFactory $readFactory,
+        array $data = []
     ) {
         $this->moduleResource     = $moduleResource;
         $this->componentRegistrar = $componentRegistrar;
@@ -93,7 +87,7 @@ class Version extends Value
         /** @var string[] $data */
         $data = json_decode($composerJsonData);
         if (!empty($data->version)) {
-            $version = !empty($data->version);
+            $version = $data->version;
         }
 
         return $version;

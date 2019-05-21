@@ -363,8 +363,8 @@
     </type>
     <type name="Pimgento\Api\Model\Config\Version" shared="false">
         <arguments>
-            <argument name="class" xsi:type="object">Magento\Framework\Component\ComponentRegistrarInterface</argument>
-            <argument name="class" xsi:type="object">Magento\Framework\Filesystem\Directory\ReadFactory</argument>
+            <argument name="componentRegistrar" xsi:type="object">Magento\Framework\Component\ComponentRegistrarInterface</argument>
+            <argument name="readFactory" xsi:type="object">Magento\Framework\Filesystem\Directory\ReadFactory</argument>
         </arguments>
     </type>
 </config>
