@@ -49,7 +49,6 @@ class Version extends Value
         \Magento\Framework\Filesystem\Directory\ReadFactory $readFactory,
         array $data = []
     ) {
-        $this->moduleResource     = $moduleResource;
         $this->componentRegistrar = $componentRegistrar;
         $this->readFactory        = $readFactory;
 
