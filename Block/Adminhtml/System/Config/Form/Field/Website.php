@@ -88,11 +88,13 @@ class Website extends AbstractFieldArray
      */
     public function renderCellTemplate($columnName)
     {
+        /** @var array $options */
+        $options = [];
+
         if ($columnName === 'website') {
             /** @var \Magento\Store\Api\Data\WebsiteInterface[] $websites */
             $websites = $this->_storeManager->getWebsites();
-            /** @var array $options */
-            $options = [];
+
             /** @var \Magento\Store\Api\Data\WebsiteInterface $website */
             foreach ($websites as $website) {
                 $options[$website->getCode()] = $website->getCode();
@@ -102,30 +104,25 @@ class Website extends AbstractFieldArray
         if ($columnName === 'channel') {
             /** @var ResourceCursorInterface[] $channels */
             $channels = $this->channel->getChannels();
-            /** @var array $options */
-            $options = [];
+
             /** @var ResourceCursorInterface $channel */
             foreach ($channels as $channel) {
                 $options[$channel['code']] = $channel['code'];
             }
         }
 
-        if(!empty($options)) {
-            /** @var \Magento\Framework\Data\Form\Element\Select $element */
-            $element = $this->elementFactory->create('select');
-            $element->setForm(
-                $this->getForm()
-            )->setName(
-                $this->_getCellInputElementName($columnName)
-            )->setHtmlId(
-                $this->_getCellInputElementId('<%- _id %>', $columnName)
-            )->setValues(
-                $options
-            );
+        /** @var \Magento\Framework\Data\Form\Element\Select $element */
+        $element = $this->elementFactory->create('select');
+        $element->setForm(
+            $this->getForm()
+        )->setName(
+            $this->_getCellInputElementName($columnName)
+        )->setHtmlId(
+            $this->_getCellInputElementId('<%- _id %>', $columnName)
+        )->setValues(
+            $options
+        );
 
-            return str_replace("\n", '', $element->getElementHtml());
-        }
-
-        return parent::renderCellTemplate($columnName);
+        return str_replace("\n", '', $element->getElementHtml());
     }
 }
