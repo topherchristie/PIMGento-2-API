@@ -122,3 +122,4 @@ For example :<br/>
 "Website","Website"
 "Regenerate url rewrites","Regenerate url rewrites"
 "Url rewrite generation is not enabled","Url rewrite generation is not enabled"
+"Label for '%1' in %2 is missing. ","Label for '%1' in %2 is missing. "

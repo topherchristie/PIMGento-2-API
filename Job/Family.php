@@ -17,6 +17,7 @@ use Pimgento\Api\Helper\Import\Entities;
 use Pimgento\Api\Helper\Config as ConfigHelper;
 use Zend_Db_Expr as Expr;
 use Pimgento\Api\Helper\Output as OutputHelper;
+use Pimgento\Api\Helper\Store as StoreHelper;
 
 /**
  * Class Family
@@ -72,6 +73,12 @@ class Family extends Import
      * @var Config $eavConfig
      */
     protected $eavConfig;
+    /**
+     * This variable contains a StoreHelper
+     *
+     * @var StoreHelper $storeHelper
+     */
+    protected $storeHelper;
 
     /**
      * Family constructor
@@ -87,6 +94,7 @@ class Family extends Import
      * @param array $data
      */
     public function __construct(
+        StoreHelper $storeHelper,
         Entities $entitiesHelper,
         ConfigHelper $configHelper,
         OutputHelper $outputHelper,
@@ -104,6 +112,7 @@ class Family extends Import
         $this->attributeSetFactory = $attributeSetFactory;
         $this->cacheTypeList       = $cacheTypeList;
         $this->eavConfig           = $eavConfig;
+        $this->storeHelper         = $storeHelper;
     }
 
     /**
@@ -139,17 +148,23 @@ class Family extends Import
         $paginationSize = $this->configHelper->getPanigationSize();
         /** @var ResourceCursorInterface $families */
         $families = $this->akeneoClient->getFamilyApi()->all($paginationSize);
+        /** @var string $warning */
+        $warning = '';
         /**
          * @var int $index
          * @var array $family
          */
         foreach ($families as $index => $family) {
+            /** @var string[] $lang */
+            $lang = $this->storeHelper->getStores('lang');
+            $warning = $this->checkLabelPerLocales($family, $lang, $warning);
+
             $this->entitiesHelper->insertDataFromApi($family, $this->getCode());
         }
         $index++;
 
         $this->setMessage(
-            __('%1 line(s) found', $index)
+            __('%1 line(s) found. %2', $index, $warning)
         );
     }
 
