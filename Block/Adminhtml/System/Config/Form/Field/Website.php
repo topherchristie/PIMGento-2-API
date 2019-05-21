@@ -5,6 +5,7 @@ namespace Pimgento\Api\Block\Adminhtml\System\Config\Form\Field;
 use Magento\Config\Block\System\Config\Form\Field\FieldArray\AbstractFieldArray;
 use Magento\Framework\Data\Form\Element\Factory;
 use Magento\Backend\Block\Template\Context;
+use Pimgento\Api\Model\Source\Filters\Channel;
 
 /**
  * Class Website
@@ -26,20 +27,30 @@ class Website extends AbstractFieldArray
     protected $elementFactory;
 
     /**
+     * This variable contains a mixed value
+     *
+     * @var Channel $channel
+     */
+    protected $channel;
+
+    /**
      * Website constructor
      *
      * @param Context $context
      * @param Factory $elementFactory
+     * @param Channel $channel,
      * @param array   $data
      */
     public function __construct(
         Context $context,
         Factory $elementFactory,
+        Channel $channel,
         array $data = []
     ) {
         parent::__construct($context, $data);
 
         $this->elementFactory = $elementFactory;
+        $this->channel = $channel;
     }
 
     /**
@@ -77,17 +88,27 @@ class Website extends AbstractFieldArray
      */
     public function renderCellTemplate($columnName)
     {
-        if ($columnName !== 'website') {
-            return parent::renderCellTemplate($columnName);
-        }
-
-        /** @var \Magento\Store\Api\Data\WebsiteInterface[] $websites */
-        $websites = $this->_storeManager->getWebsites();
         /** @var array $options */
         $options = [];
-        /** @var \Magento\Store\Api\Data\WebsiteInterface $website */
-        foreach ($websites as $website) {
-            $options[$website->getCode()] = $website->getCode();
+
+        if ($columnName === 'website') {
+            /** @var \Magento\Store\Api\Data\WebsiteInterface[] $websites */
+            $websites = $this->_storeManager->getWebsites();
+
+            /** @var \Magento\Store\Api\Data\WebsiteInterface $website */
+            foreach ($websites as $website) {
+                $options[$website->getCode()] = $website->getCode();
+            }
+        }
+
+        if ($columnName === 'channel') {
+            /** @var ResourceCursorInterface[] $channels */
+            $channels = $this->channel->getChannels();
+
+            /** @var ResourceCursorInterface $channel */
+            foreach ($channels as $channel) {
+                $options[$channel['code']] = $channel['code'];
+            }
         }
 
         /** @var \Magento\Framework\Data\Form\Element\Select $element */

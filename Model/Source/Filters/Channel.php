@@ -63,7 +63,7 @@ class Channel implements ArrayInterface
      *
      * @return ResourceCursorInterface|array
      */
-    private function getChannels()
+    public function getChannels()
     {
         try {
             /** @var AkeneoPimClientInterface $akeneoClient */

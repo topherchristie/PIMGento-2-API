@@ -341,6 +341,7 @@ class Config extends AbstractHelper
      * @param bool $withDefault
      *
      * @return mixed[]
+     * @throws \Exception
      */
     public function getWebsiteMapping($withDefault = true)
     {
@@ -351,7 +352,7 @@ class Config extends AbstractHelper
             /** @var string $adminChannel */
             $adminChannel = $this->getAdminDefaultChannel();
             if (empty($adminChannel)) {
-                return $mapping;
+                throw new \Exception(__('No channel found for Admin website channel configuration.'));
             }
 
             $mapping[] = [
