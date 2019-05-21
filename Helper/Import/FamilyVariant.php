@@ -50,8 +50,8 @@ class FamilyVariant extends Entities
              */
             foreach ($value as $local => $data) {
                 if ($key == 'variant_attribute_sets') {
-                    $columns['variant-axes_'.$data['level']]       = join(',', $data['axes']);
-                    $columns['variant-attributes_'.$data['level']] = join(',', $data['attributes']);
+                    $columns['variant-axes_'.$data['level']]       = strtolower(join(',', $data['axes']));
+                    $columns['variant-attributes_'.$data['level']] = strtolower(join(',', $data['attributes']));
 
                     continue;
                 }
@@ -65,7 +65,6 @@ class FamilyVariant extends Entities
                 }
             }
         }
-        $columns = $this->prefixToLowerCase($columns);
 
         return $columns;
     }
