@@ -151,7 +151,7 @@ class Category extends Import
         $paginationSize = $this->configHelper->getPanigationSize();
         /** @var ResourceCursorInterface $categories */
         $categories = $this->akeneoClient->getCategoryApi()->all($paginationSize);
-        /** @var string $response */
+        /** @var string $warning */
         $warning = '';
         /**
          * @var int $index
@@ -160,7 +160,6 @@ class Category extends Import
         foreach ($categories as $index => $category) {
             /** @var string[] $lang */
             $lang = $this->storeHelper->getStores('lang');
-            /** @var string $checkLabels */
             $warning = $this->checkLabelPerLocales($category, $lang, $warning);
 
             $this->entitiesHelper->insertDataFromApi($category, $this->getCode());

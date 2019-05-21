@@ -148,7 +148,7 @@ class Family extends Import
         $paginationSize = $this->configHelper->getPanigationSize();
         /** @var ResourceCursorInterface $families */
         $families = $this->akeneoClient->getFamilyApi()->all($paginationSize);
-        /** @var string $response */
+        /** @var string $warning */
         $warning = '';
         /**
          * @var int $index
@@ -157,7 +157,6 @@ class Family extends Import
         foreach ($families as $index => $family) {
             /** @var string[] $lang */
             $lang = $this->storeHelper->getStores('lang');
-            /** @var string $checkLabels */
             $warning = $this->checkLabelPerLocales($family, $lang, $warning);
 
             $this->entitiesHelper->insertDataFromApi($family, $this->getCode());
