@@ -60,8 +60,10 @@ class Product extends Entities
             if ($key === self::VALUES_KEY) {
                 /** @var array $values */
                 $values = $this->formatValues($value);
+                /** @var string[] $newValues */
+                $newValues = $this->prefixToLowerCase($values); // Set prefix attribut to lower case
                 /** @var array $columns */
-                $columns = $columns + $values;
+                $columns = $columns + $newValues;
 
                 continue;
             }
