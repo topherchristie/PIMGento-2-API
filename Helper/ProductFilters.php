@@ -260,7 +260,7 @@ class ProductFilters extends Helper
                 return;
             }
             $dates = [$dateAfter, $dateBefore];
-            $this->getSearchBuilder()->addFilter('updated', $mode, $dates);
+            $this->searchBuilder->addFilter('updated', $mode, $dates);
         }
         if ($mode == Update::SINCE_LAST_N_DAYS) {
             /** @var string $filter */
@@ -268,7 +268,7 @@ class ProductFilters extends Helper
             if (!is_numeric($filter)) {
                 return;
             }
-            $this->getSearchBuilder()->addFilter('updated', $mode, (int)$filter);
+            $this->searchBuilder->addFilter('updated', $mode, (int)$filter);
         }
         if ($mode == Update::LOWER_THAN) {
             /** @var string $date */
@@ -286,7 +286,7 @@ class ProductFilters extends Helper
             $date = $date . ' 00:00:00';
         }
         if (!empty($date)) {
-            $this->getSearchBuilder()->addFilter('updated', $mode, $date);
+            $this->searchBuilder->addFilter('updated', $mode, $date);
         }
         return;
     }
