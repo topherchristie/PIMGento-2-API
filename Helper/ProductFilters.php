@@ -12,6 +12,7 @@ use Pimgento\Api\Helper\Locales as LocalesHelper;
 use Pimgento\Api\Model\Source\Filters\Completeness;
 use Pimgento\Api\Model\Source\Filters\Mode;
 use Pimgento\Api\Model\Source\Filters\Status;
+use Pimgento\Api\Model\Source\Filters\Update;
 
 /**
  * Class ProductFiltersHelper
@@ -249,13 +250,44 @@ class ProductFilters extends Helper
      */
     protected function addUpdatedFilter()
     {
-        /** @var string $filter */
-        $filter = $this->configHelper->getUpdatedFilter();
-        if (!is_numeric($filter)) {
-            return;
-        }
-        $this->searchBuilder->addFilter('updated', 'SINCE LAST N DAYS', (int)$filter);
+        /** @var string $mode */
+        $mode = $this->configHelper->getUpdatedMode();
 
+        if ($mode == Update::BETWEEN) {
+            $dateAfter  = $this->configHelper->getUpdatedBetweenAfterFilter() . ' 00:00:00';
+            $dateBefore = $this->configHelper->getUpdatedBetweenBeforeFilter() . ' 23:59:59';
+            if (empty($dateAfter) || empty($dateBefore)) {
+                return;
+            }
+            $dates = [$dateAfter, $dateBefore];
+            $this->searchBuilder->addFilter('updated', $mode, $dates);
+        }
+        if ($mode == Update::SINCE_LAST_N_DAYS) {
+            /** @var string $filter */
+            $filter = $this->configHelper->getUpdatedSinceFilter();
+            if (!is_numeric($filter)) {
+                return;
+            }
+            $this->searchBuilder->addFilter('updated', $mode, (int)$filter);
+        }
+        if ($mode == Update::LOWER_THAN) {
+            /** @var string $date */
+            $date = $this->configHelper->getUpdatedLowerFilter();
+            if (empty($date)) {
+                return;
+            }
+            $date = $date . ' 23:59:59';
+        }
+        if ($mode == Update::GREATER_THAN) {
+            $date = $this->configHelper->getUpdatedGreaterFilter();
+            if (empty($date)) {
+                return;
+            }
+            $date = $date . ' 00:00:00';
+        }
+        if (!empty($date)) {
+            $this->searchBuilder->addFilter('updated', $mode, $date);
+        }
         return;
     }
 
