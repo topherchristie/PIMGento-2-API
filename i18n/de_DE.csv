@@ -118,6 +118,7 @@ Zum Beispiel :<br/>
 "Select the locales to apply the completeness filter on","Wählen Sie die Gebietsschemata, in denen der Vollständigkeitsfilter angewendet werden soll"
 "Set Magento Admin website default Pim channel","Konfigurieren Sie den Standard-PIM-Kanal der Magento Admin-Website"
 "Since last n days","Seit den letzten X Tagen"
+"Since last X days","Seit den letzten X Tagen"
 "Start import","Importieren starten"
 "Status","Status"
 "Test API credentials","Test API Anmeldedaten"

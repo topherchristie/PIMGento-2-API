@@ -118,6 +118,7 @@ For example :<br/>
 "Select the locales to apply the completeness filter on","Select the locales to apply the completeness filter on"
 "Set Magento Admin website default Pim channel","Set Magento Admin website default Pim channel"
 "Since last n days","Since last n days"
+"Since last X days","Since last X days"
 "Start import","Start import"
 "Status","Status"
 "Test API credentials","Test API credentials"

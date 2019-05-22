@@ -143,7 +143,7 @@
                 </field>
                 <field id="updated_between_before" translate="label" type="date" sortOrder="110" showInDefault="1" showInWebsite="0"
                         showInStore="0">
-                    <label>Updated after</label>
+                    <label>Updated before</label>
                     <comment>Import only product updated before the given date. Leave at least one blank for no filter.</comment>
                     <frontend_model>Pimgento\Api\Block\Adminhtml\System\Config\Form\Field\Date</frontend_model>
                     <depends>
