@@ -254,11 +254,13 @@ class ProductFilters extends Helper
         $mode = $this->configHelper->getUpdatedMode();
 
         if ($mode == Update::BETWEEN) {
-            $dateAfter  = $this->configHelper->getUpdatedBetweenAfterFilter() . ' 00:00:00';
-            $dateBefore = $this->configHelper->getUpdatedBetweenBeforeFilter() . ' 23:59:59';
+            $dateAfter  = $this->configHelper->getUpdatedBetweenAfterFilter();
+            $dateBefore = $this->configHelper->getUpdatedBetweenBeforeFilter();
             if (empty($dateAfter) || empty($dateBefore)) {
                 return;
             }
+            $dateAfter  = $dateAfter . ' 00:00:00';
+            $dateBefore = $dateBefore . ' 23:59:59';
             $dates = [$dateAfter, $dateBefore];
             $this->searchBuilder->addFilter('updated', $mode, $dates);
         }
