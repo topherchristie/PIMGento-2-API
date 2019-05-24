@@ -59,8 +59,6 @@ class Family implements ArrayInterface
             /** @var AkeneoPimClientInterface $client */
             $client = $this->akeneoAuthenticator->getAkeneoApiClient();
 
-            $this->options[''] = __('None');
-
             if (empty($client)) {
                 return;
             }

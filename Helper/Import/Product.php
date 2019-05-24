@@ -60,8 +60,10 @@ class Product extends Entities
             if ($key === self::VALUES_KEY) {
                 /** @var array $values */
                 $values = $this->formatValues($value);
+                /** @var string[] $newValues */
+                $newValues = $this->prefixToLowerCase($values); // Set prefix attribut to lower case
                 /** @var array $columns */
-                $columns = $columns + $values;
+                $columns = $columns + $newValues;
 
                 continue;
             }
@@ -137,6 +139,9 @@ class Product extends Entities
                 // Attribute is a price
                 /** @var array $price */
                 foreach ($attributeValue['data'] as $price) {
+                    if (!array_key_exists('currency', $price) || !array_key_exists('amount', $price)) {
+                        continue;
+                    }
                     /** @var string $priceKey */
                     $priceKey           = $key . '-' . $price['currency'];
                     $columns[$priceKey] = $price['amount'];

@@ -270,22 +270,19 @@ class Product extends Import
     {
         /** @var string|int $paginationSize */
         $paginationSize = $this->configHelper->getPanigationSize();
-
-        /** @var int $count */
-        $count = 0;
+        /** @var int $index */
+        $index = 0;
         /** @var mixed[] $filters */
         $filters = $this->getFilters();
         /** @var mixed[] $filter */
         foreach ($filters as $filter) {
-            /** @var int $index */
-            $index = 0;
             /** @var Akeneo\Pim\ApiClient\Pagination\ResourceCursorInterface $products */
             $products = $this->akeneoClient->getProductApi()->all($paginationSize, $filter);
             /**
              * @var int     $index
              * @var mixed[] $product
              */
-            foreach ($products as $index => $product) {
+            foreach ($products as $product) {
                 /** @var bool $result */
                 $result = $this->entitiesHelper->insertDataFromApi($product, $this->getCode());
                 if (!$result) {
@@ -294,23 +291,19 @@ class Product extends Import
 
                     return;
                 }
-            }
 
-            if ($index) {
-                $count = $index;
+                $index++;
             }
         }
 
-        if (empty($count)) {
+        if (empty($index)) {
             $this->setMessage('No Product data to insert in temp table');
             $this->stop(true);
 
             return;
         }
 
-        $count++;
-
-        $this->setMessage(__('%1 line(s) found', $count));
+        $this->setMessage(__('%1 line(s) found', $index));
     }
 
     /**

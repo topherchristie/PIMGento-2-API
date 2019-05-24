@@ -16,6 +16,13 @@
             <label>Pimgento</label>
             <tab>catalog</tab>
             <resource>Pimgento_Import::config_pimgento</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1">
+                <label>General</label>
+                <field id="version" translate="label" type="label" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Extension Version</label>
+                    <backend_model>Pimgento\Api\Model\Config\Version</backend_model>
+                </field>
+            </group>
             <group id="akeneo_api" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
                 <label>Akeneo API Configuration</label>
                 <field id="base_url" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
@@ -50,10 +57,10 @@
                     <label>Pagination size</label>
                     <comment>Must be a value between 1 and 100. Default value is 100.</comment>
                 </field>
-                <field id="admin_channel" translate="label comment" type="text" sortOrder="90" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="admin_channel" translate="label comment" type="select" sortOrder="90" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Admin Website Channel</label>
+                    <source_model>Pimgento\Api\Model\Source\Filters\Channel</source_model>
                     <comment>Set Magento Admin website default Pim channel</comment>
-                    <validate>required-entry</validate>
                 </field>
                 <field id="website_mapping" translate="label" type="text" sortOrder="91" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Website Mapping</label>
@@ -103,16 +110,66 @@
                         <field id="mode">standard</field>
                     </depends>
                 </field>
-                <field id="updated" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="updated_mode" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="0"
+                        showInStore="0">
+                    <label>Updated mode</label>
+                    <source_model>Pimgento\Api\Model\Source\Filters\Update</source_model>
+                    <depends>
+                        <field id="mode">standard</field>
+                    </depends>
+                </field>
+                <field id="updated_lower" translate="label" type="date" sortOrder="80" showInDefault="1" showInWebsite="0"
+                        showInStore="0">
+                    <label>Updated before</label>
+                    <comment>Import only product updated before the given date. Leave blank for no filter.</comment>
+                    <frontend_model>Pimgento\Api\Block\Adminhtml\System\Config\Form\Field\Date</frontend_model>
+                    <depends>
+                        <field id="mode">standard</field>
+                        <field id="updated_mode">&lt;</field>
+                    </depends>
+                </field>
+                <field id="updated_greater" translate="label" type="date" sortOrder="90" showInDefault="1" showInWebsite="0"
+                        showInStore="0">
+                    <label>Updated after</label>
+                    <comment>Import only product updated after the given date. Leave blank for no filter.</comment>
+                    <frontend_model>Pimgento\Api\Block\Adminhtml\System\Config\Form\Field\Date</frontend_model>
+                    <depends>
+                        <field id="mode">standard</field>
+                        <field id="updated_mode">&gt;</field>
+                    </depends>
+                </field>
+                <field id="updated_between_after" translate="label" type="date" sortOrder="100" showInDefault="1" showInWebsite="0"
+                        showInStore="0">
+                    <label>Updated after</label>
+                    <comment>Import only product updated after the given date. Leave at least one blank for no filter.</comment>
+                    <frontend_model>Pimgento\Api\Block\Adminhtml\System\Config\Form\Field\Date</frontend_model>
+                    <depends>
+                        <field id="mode">standard</field>
+                        <field id="updated_mode">BETWEEN</field>
+                    </depends>
+                </field>
+                <field id="updated_between_before" translate="label" type="date" sortOrder="110" showInDefault="1" showInWebsite="0"
+                        showInStore="0">
+                    <label>Updated before</label>
+                    <comment>Import only product updated before the given date. Leave at least one blank for no filter.</comment>
+                    <frontend_model>Pimgento\Api\Block\Adminhtml\System\Config\Form\Field\Date</frontend_model>
+                    <depends>
+                        <field id="mode">standard</field>
+                        <field id="updated_mode">BETWEEN</field>
+                    </depends>
+                </field>
+                <field id="updated" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="0"
+                       showInStore="0">
                     <label>Updated</label>
                     <comment>
                         <![CDATA[Import only product updated since last X days. Leave blank for no filter.]]>
                     </comment>
                     <depends>
                         <field id="mode">standard</field>
+                        <field id="updated_mode">SINCE LAST N DAYS</field>
                     </depends>
                 </field>
-                <field id="families" translate="label comment" type="multiselect" sortOrder="70" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="families" translate="label comment" type="multiselect" sortOrder="130" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Families</label>
                     <source_model>Pimgento\Api\Model\Source\Filters\Family</source_model>
                     <comment>
@@ -121,8 +178,9 @@
                     <depends>
                         <field id="mode">standard</field>
                     </depends>
+                    <can_be_empty>1</can_be_empty>
                 </field>
-                <field id="advanced_filter" translate="label comment" type="textarea" sortOrder="80" showInDefault="1" showInWebsite="0" showInStore="0">
+                <field id="advanced_filter" translate="label comment" type="textarea" sortOrder="140" showInDefault="1" showInWebsite="0" showInStore="0">
                     <label>Advanced Filter</label>
                     <backend_model>Pimgento\Api\Model\Backend\Json</backend_model>
                     <comment>

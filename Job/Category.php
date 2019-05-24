@@ -151,17 +151,23 @@ class Category extends Import
         $paginationSize = $this->configHelper->getPanigationSize();
         /** @var ResourceCursorInterface $categories */
         $categories = $this->akeneoClient->getCategoryApi()->all($paginationSize);
+        /** @var string $warning */
+        $warning = '';
         /**
          * @var int $index
          * @var array $category
          */
         foreach ($categories as $index => $category) {
+            /** @var string[] $lang */
+            $lang = $this->storeHelper->getStores('lang');
+            $warning = $this->checkLabelPerLocales($category, $lang, $warning);
+
             $this->entitiesHelper->insertDataFromApi($category, $this->getCode());
         }
         $index++;
 
         $this->setMessage(
-            __('%1 line(s) found', $index)
+            __('%1 line(s) found. %2', $index, $warning)
         );
     }
 

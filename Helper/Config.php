@@ -49,7 +49,12 @@ class Config extends AbstractHelper
     const PRODUCTS_FILTERS_COMPLETENESS_LOCALES = 'pimgento/products_filters/completeness_locales';
     const PRODUCTS_FILTERS_STATUS = 'pimgento/products_filters/status';
     const PRODUCTS_FILTERS_FAMILIES = 'pimgento/products_filters/families';
-    const PRODUCTS_FILTERS_UPDATED = 'pimgento/products_filters/updated';
+    const PRODUCTS_FILTERS_UPDATED_MODE = 'pimgento/products_filters/updated_mode';
+    const PRODUCTS_FILTERS_UPDATED_LOWER = 'pimgento/products_filters/updated_lower';
+    const PRODUCTS_FILTERS_UPDATED_GREATER = 'pimgento/products_filters/updated_greater';
+    const PRODUCTS_FILTERS_UPDATED_BETWEEN_AFTER = 'pimgento/products_filters/updated_between_after';
+    const PRODUCTS_FILTERS_UPDATED_BETWEEN_BEFORE = 'pimgento/products_filters/updated_between_before';
+    const PRODUCTS_FILTERS_UPDATED_SINCE = 'pimgento/products_filters/updated';
     const PRODUCTS_FILTERS_ADVANCED_FILTER = 'pimgento/products_filters/advanced_filter';
     const PRODUCTS_CATEGORY_IS_ACTIVE = 'pimgento/category/is_active';
     const PRODUCTS_CATEGORY_INCLUDE_IN_MENU = 'pimgento/category/include_in_menu';
@@ -264,13 +269,63 @@ class Config extends AbstractHelper
     }
 
     /**
-     * Retrieve the updated filter
+     * Retrieve updated mode
      *
      * @return string
      */
-    public function getUpdatedFilter()
+    public function getUpdatedMode()
     {
-        return $this->scopeConfig->getValue(self::PRODUCTS_FILTERS_UPDATED);
+        return $this->scopeConfig->getValue(self::PRODUCTS_FILTERS_UPDATED_MODE);
+    }
+
+    /**
+     * Retrieve the updated before filter
+     *
+     * @return string
+     */
+    public function getUpdatedLowerFilter()
+    {
+        return $this->scopeConfig->getValue(self::PRODUCTS_FILTERS_UPDATED_LOWER);
+    }
+
+    /**
+     * Retrieve the updated after filter
+     *
+     * @return string
+     */
+    public function getUpdatedGreaterFilter()
+    {
+        return $this->scopeConfig->getValue(self::PRODUCTS_FILTERS_UPDATED_GREATER);
+    }
+
+    /**
+     * Retrieve the updated after for between filter
+     *
+     * @return string
+     */
+    public function getUpdatedBetweenAfterFilter()
+    {
+        return $this->scopeConfig->getValue(self::PRODUCTS_FILTERS_UPDATED_BETWEEN_AFTER);
+    }
+
+    /**
+     * Retrieve the updated before for between filter
+     *
+     * @return string
+     */
+    public function getUpdatedBetweenBeforeFilter()
+    {
+        return $this->scopeConfig->getValue(self::PRODUCTS_FILTERS_UPDATED_BETWEEN_BEFORE);
+    }
+
+    /**
+     * Retrieve the updated since filter
+     *
+     * @return string
+     */
+    public function getUpdatedSinceFilter()
+    {
+        return $this->scopeConfig->getValue(self::PRODUCTS_FILTERS_UPDATED_SINCE);
     }
 
     /**
@@ -341,6 +396,7 @@ class Config extends AbstractHelper
      * @param bool $withDefault
      *
      * @return mixed[]
+     * @throws \Exception
      */
     public function getWebsiteMapping($withDefault = true)
     {
@@ -351,7 +407,7 @@ class Config extends AbstractHelper
             /** @var string $adminChannel */
             $adminChannel = $this->getAdminDefaultChannel();
             if (empty($adminChannel)) {
-                return $mapping;
+                throw new \Exception(__('No channel found for Admin website channel configuration.'));
             }
 
             $mapping[] = [
