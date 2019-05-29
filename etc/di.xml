@@ -342,6 +342,10 @@
                         <item name="method" xsi:type="string">importAsset</item>
                         <item name="comment" xsi:type="string">Import asset files</item>
                     </item>
+                    <item name="17" xsi:type="array">
+                        <item name="method" xsi:type="string">cleanupAssetsAndMedia</item>
+                        <item name="comment" xsi:type="string">Cleanup Image and Asset files</item>
+                    </item>
                     <item name="18" xsi:type="array">
                         <item name="method" xsi:type="string">dropTable</item>
                         <item name="comment" xsi:type="string">Drop temporary table</item>

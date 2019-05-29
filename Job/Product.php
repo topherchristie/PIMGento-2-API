@@ -1401,7 +1401,11 @@ class Product extends Import
             }
         }
     }
-
+    public function cleanupAssetsAndMedia() {
+        $this->setMessage(
+            __('Clean up is called but not doing anything yet')
+        );
+    }
     /**
      * Set Url Rewrite
      *
