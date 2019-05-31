@@ -1449,7 +1449,7 @@ class Product extends Import
 	    $o->next();
         }
         $this->setMessage(
-            __('Clean up is called but not doing anything yet: '.$this->productsWithAssets->count())
+            __('Clean assets and media ran for '.$this->productsWithAssets->count().' products.')
         );
     }
     /**
