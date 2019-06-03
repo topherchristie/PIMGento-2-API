@@ -92,7 +92,42 @@ class PimgentoImportCommand extends Command
         if (!$code) {
             $this->usage($output);
         } else {
+            $this->checkEntities($code, $output);
+        }
+    }
+
+    /**
+     * Check if multiple entities have been specified
+     * in the command line
+     *
+     * @param string $code
+     * @param OutputInterface $output
+     *
+     * @return void
+     */
+    protected function checkEntities(string $code, OutputInterface $output): void
+    {
+        /** @var string[] $entities */
+        $entities = explode(',', $code);
+        if (count($entities) > 1) {
+            $this->multiImport($entities, $output);
+        } else {
             $this->import($code, $output);
+        }
+    }
+
+    /**
+     * Run import for multiple entities
+     *
+     * @param array $entities
+     * @param OutputInterface $output
+     *
+     * @return void
+     */
+    protected function multiImport(array $entities, OutputInterface $output): void
+    {
+        foreach ($entities as $entity) {
+            $this->import($entity, $output);
         }
     }
 
