@@ -115,6 +115,7 @@ Par exemple :<br/>
 "pimgento:import --code=%1","pimgento:import --code=%1"
 "Product Images Mapping","Correspondance des images"
 "Select import type:","Selectionnez le type de l'import :"
+"Select the categories you don't want to import.<br/> If the multiselect is empty, it means you don't have any categories in your Akeneo, or the provided credentials are wrong.","Sélectionnez les catégories que vous ne voulez pas récupérer.<br/>Si le multiselect est vide, ça signifie que vous n'avez pas de catégories dans votre Akeneo, ou que les identifiants fournis sont erronés."
 "Select the channel to apply the completeness filter on","Choisissez le canal sur lequel appliquer le filtre de complétude"
 "Select the families you don't want to retrieve products from.<br/> If the multiselect is empty, it means you don't have any families in your Akeneo, or the provided credentials are wrong.","Choisissez les familles dont vous ne voulez pas récupérer les produits.<br/>Si le multiselect est vide, ça signifie que vous n'avez pas de familles dans votre Akeneo, ou que les identifiants fournis sont erronés."
 "Select the locales to apply the completeness filter on","Choisissez les locales sur lesquelles appliquer le filtre de complétude"
