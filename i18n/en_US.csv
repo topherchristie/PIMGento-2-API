@@ -95,6 +95,8 @@ For example :<br/>
 "Match Magento website with Pim channel","Match Magento website with Pim channel"
 "Media import is not enabled","Media import is not enabled"
 "Must be a value between 1 and 100. Default value is 100.","Must be a value between 1 and 100. Default value is 100."
+"No category found","No category found"
+"No category to ignore","No category to ignore"
 "No condition","No condition"
 "No options found","No options found"
 "No Product data to insert in temp table for scope: %s","No Product data to insert in temp table for scope: %s"
