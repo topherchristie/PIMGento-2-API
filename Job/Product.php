@@ -2043,7 +2043,6 @@ class Product extends Import
                     $connection->insertOnDuplicate($galleryValueTable, $data, array_keys($data));
 
                     if (!$this->hasFiles($row[$columnIdentifier]) ) {
-                        $this->logger
                         /** @var array $entities */
                         $attributes = [
                             $this->configHelper->getAttribute(ProductModel::ENTITY, 'image'),
