@@ -1459,7 +1459,18 @@ class Product extends Import
             }
         }
     }
-    
+    public function hasFiles($product_id) {
+        $connection = $this->entitiesHelper->getConnection();
+        $assetMapTable = $this->entitiesHelper->getTableName('product_asset_map');
+        $sql = sprintf('SELECT COUNT(*) as `cnt` FROM `%s` WHERE _entity_id =\'%s\'', $assetMapTable, $product_id);
+        $cnt = $connection->rawFetchRow($sql, 'cnt');
+        if ($cnt > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public function cleanupAssetsAndMedia() {
         /** @var AdapterInterface $connection */
 	    $connection = $this->entitiesHelper->getConnection();
@@ -2031,7 +2042,8 @@ class Product extends Import
                     ];
                     $connection->insertOnDuplicate($galleryValueTable, $data, array_keys($data));
 
-                    if (empty($files)) {
+                    if (!$this->hasFiles($row[$columnIdentifier]) ) {
+                        $this->logger
                         /** @var array $entities */
                         $attributes = [
                             $this->configHelper->getAttribute(ProductModel::ENTITY, 'image'),
