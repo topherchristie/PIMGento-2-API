@@ -7,7 +7,7 @@ use Magento\Framework\App\State;
 use Magento\Framework\Data\Collection;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Phrase;
-use Pimgento\Api\Api\ImportRepositoryInterface;
+use Pimgento\Api\Api\ImportRepositoryInterface\Proxy;
 use Pimgento\Api\Job\Import;
 use \Symfony\Component\Console\Command\Command;
 use \Symfony\Component\Console\Input\InputInterface;
@@ -48,12 +48,12 @@ class PimgentoImportCommand extends Command
     /**
      * PimgentoImportCommand constructor.
      *
-     * @param ImportRepositoryInterface\Proxy $importRepository
-     * @param State                           $appState
-     * @param null                            $name
+     * @param Proxy $importRepository
+     * @param State $appState
+     * @param null  $name
      */
     public function __construct(
-        ImportRepositoryInterface\Proxy $importRepository,
+        Proxy $importRepository,
         State $appState,
         $name = null
     ) {
