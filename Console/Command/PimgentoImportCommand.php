@@ -26,7 +26,6 @@ use \Symfony\Component\Console\Input\InputOption;
  */
 class PimgentoImportCommand extends Command
 {
-
     /**
      * This constant contains a string
      *
@@ -49,7 +48,7 @@ class PimgentoImportCommand extends Command
     /**
      * PimgentoImportCommand constructor.
      *
-     * @param ImportRepositoryInterface $importRepository
+     * @param ImportRepositoryInterface\Proxy $importRepository
      * @param State $appState
      * @param null $name
      */
@@ -71,7 +70,11 @@ class PimgentoImportCommand extends Command
     {
         $this->setName('pimgento:import')
             ->setDescription('Import PIM data to Magento')
-            ->addOption(self::IMPORT_CODE,null,InputOption::VALUE_REQUIRED);
+            ->addOption(
+                self::IMPORT_CODE,
+                null,
+                InputOption::VALUE_REQUIRED
+            );
     }
 
     /**
@@ -99,19 +102,19 @@ class PimgentoImportCommand extends Command
     /**
      * Run import
      *
-     * @param string $code
+     * @param string          $code
      * @param OutputInterface $output
      *
      * @return bool
      */
-    protected function import($code, OutputInterface $output)
+    protected function import(string $code, OutputInterface $output): bool
     {
         /** @var Import $import */
         $import = $this->importRepository->getByCode($code);
         if (!$import) {
             /** @var Phrase $message */
             $message = __('Import code not found');
-            $output->writeln('<error>' . $message . '</error>');
+            $this->displayError($message, $output);
 
             return false;
         }
@@ -122,17 +125,17 @@ class PimgentoImportCommand extends Command
             while ($import->canExecute()) {
                 /** @var string $comment */
                 $comment = $import->getComment();
-                $output->writeln($comment);
+                $this->displayInfo($comment, $output);
 
                 $import->execute();
 
                 /** @var string $message */
                 $message = $import->getMessage();
                 if (!$import->getStatus()) {
-                    $message = '<error>' . $message . '</error>';
+                    $this->displayError($message, $output);
+                } else {
+                    $this->displayComment($message, $output);
                 }
-
-                $output->writeln($message);
 
                 if ($import->isDone()) {
                     break;
@@ -141,7 +144,7 @@ class PimgentoImportCommand extends Command
         } catch (\Exception $exception) {
             /** @var string $message */
             $message = $exception->getMessage();
-            $output->writeln($message);
+            $this->displayError($message, $output);
         }
 
         return true;
@@ -154,21 +157,21 @@ class PimgentoImportCommand extends Command
      *
      * @return void
      */
-    protected function usage(OutputInterface $output)
+    protected function usage(OutputInterface $output): void
     {
         /** @var Collection $imports */
         $imports = $this->importRepository->getList();
 
         // Options
-        $output->writeln('<comment>' . __('Options:') . '</comment>');
-        $output->writeln('<info>' . __('--code') . '</info>');
+        $this->displayComment(__('Options:'), $output);
+        $this->displayInfo(__('--code'), $output);
         $output->writeln('');
 
         // Codes
-        $output->writeln('<comment>' . __('Available codes:') . '</comment>');
+        $this->displayComment(__('Available codes:'), $output);
         /** @var Import $import */
         foreach ($imports as $import) {
-            $output->writeln('<info>' . $import->getCode() . '</info>');
+            $this->displayInfo($import->getCode(), $output);
         }
         $output->writeln('');
 
@@ -178,8 +181,59 @@ class PimgentoImportCommand extends Command
         /** @var string $code */
         $code = $import->getCode();
         if ($code) {
-            $output->writeln('<comment>' . __('Example:') . '</comment>');
-            $output->writeln('<info>' . __('pimgento:import --code=%1', $code) . '</info>');
+            $this->displayComment(__('Example:'), $output);
+            $this->displayInfo(__('pimgento:import --code=%1', $code), $output);
+        }
+    }
+
+    /**
+     * Display info in console
+     *
+     * @param string          $message
+     * @param OutputInterface $output
+     *
+     * @return void
+     */
+    public function displayInfo(string $message, OutputInterface $output): void
+    {
+        if (!empty($message)) {
+            /** @var string $coloredMessage */
+            $coloredMessage = '<info>'.$message.'</info>';
+            $output->writeln($coloredMessage);
+        }
+    }
+
+    /**
+     * Display comment in console
+     *
+     * @param string          $message
+     * @param OutputInterface $output
+     *
+     * @return void
+     */
+    public function displayComment(string $message, OutputInterface $output): void
+    {
+        if (!empty($message)) {
+            /** @var string $coloredMessage */
+            $coloredMessage = '<comment>'.$message.'</comment>';
+            $output->writeln($coloredMessage);
+        }
+    }
+
+    /**
+     * Display error in console
+     *
+     * @param string          $message
+     * @param OutputInterface $output
+     *
+     * @return void
+     */
+    public function displayError(string $message, OutputInterface $output): void
+    {
+        if (!empty($message)) {
+            /** @var string $coloredMessage */
+            $coloredMessage = '<error>'.$message.'</error>';
+            $output->writeln($coloredMessage);
         }
     }
 }
