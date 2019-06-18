@@ -59,7 +59,7 @@ class Config extends AbstractHelper
     const PRODUCTS_CATEGORY_IS_ACTIVE = 'pimgento/category/is_active';
     const PRODUCTS_CATEGORY_INCLUDE_IN_MENU = 'pimgento/category/include_in_menu';
     const PRODUCTS_CATEGORY_IS_ANCHOR = 'pimgento/category/is_anchor';
-    const PRODUCTS_CATEGORY_CATEGORIES = 'pimgento/category/categories';
+    const PRODUCTS_CATEGORY_CATEGORIES = 'pimgento/products_filters/categories';
     const PRODUCT_ATTRIBUTE_MAPPING = 'pimgento/product/attribute_mapping';
     const PRODUCT_CONFIGURABLE_ATTRIBUTES = 'pimgento/product/configurable_attributes';
     const PRODUCT_TAX_CLASS = 'pimgento/product/tax_class';
