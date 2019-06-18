@@ -49,8 +49,8 @@ class PimgentoImportCommand extends Command
      * PimgentoImportCommand constructor.
      *
      * @param ImportRepositoryInterface\Proxy $importRepository
-     * @param State $appState
-     * @param null $name
+     * @param State                           $appState
+     * @param null                            $name
      */
     public function __construct(
         ImportRepositoryInterface\Proxy $importRepository,
