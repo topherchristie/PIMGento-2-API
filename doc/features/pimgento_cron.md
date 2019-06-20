@@ -27,3 +27,11 @@ With **import-type**:
 * product_model
 * family_variant
 * product
+
+### Multiple imports:
+
+You can also launch multiple imports with command line:
+
+```bash
+php bin/magento pimgento:import --code=import-type1,import-type2,import-type3
+```
