@@ -36,6 +36,6 @@ class Index extends Action
      */
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('Pimgento_Log::pimgento_log');
+        return $this->_authorization->isAllowed('Pimgento_Api::pimgento_log');
     }
 }
