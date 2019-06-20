@@ -562,13 +562,7 @@ class Category extends Import
                 continue;
             }
             $connection->delete($tableName, ['path LIKE ?' => '%/' . $category['_entity_id'] . '/%']);
-            $connection->delete(
-                $tableName,
-                [
-                    'path LIKE ?'   => '%/' . $category['_entity_id'],
-                    'path NOT LIKE ?' => '%/' . $category['_entity_id'] . '%',
-                ]
-            );
+            $connection->delete($tableName, ['path LIKE ?'   => '%/' . $category['_entity_id']]);
         }
     }
 
