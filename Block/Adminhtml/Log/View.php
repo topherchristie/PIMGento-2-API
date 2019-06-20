@@ -101,7 +101,7 @@ class View extends Template
      */
     public function getBackUrl()
     {
-        return $this->urlModel->getUrl('pimgento/log');
+        return $this->urlModel->getUrl('pimgento_api/log');
     }
 
     /**
