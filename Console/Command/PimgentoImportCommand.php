@@ -157,7 +157,7 @@ class PimgentoImportCommand extends Command
      *
      * @return void
      */
-    protected function usage(OutputInterface $output): void
+    protected function usage(OutputInterface $output)
     {
         /** @var Collection $imports */
         $imports = $this->importRepository->getList();
@@ -194,7 +194,7 @@ class PimgentoImportCommand extends Command
      *
      * @return void
      */
-    public function displayInfo(string $message, OutputInterface $output): void
+    public function displayInfo(string $message, OutputInterface $output)
     {
         if (!empty($message)) {
             /** @var string $coloredMessage */
@@ -211,7 +211,7 @@ class PimgentoImportCommand extends Command
      *
      * @return void
      */
-    public function displayComment(string $message, OutputInterface $output): void
+    public function displayComment(string $message, OutputInterface $output)
     {
         if (!empty($message)) {
             /** @var string $coloredMessage */
@@ -228,7 +228,7 @@ class PimgentoImportCommand extends Command
      *
      * @return void
      */
-    public function displayError(string $message, OutputInterface $output): void
+    public function displayError(string $message, OutputInterface $output)
     {
         if (!empty($message)) {
             /** @var string $coloredMessage */
