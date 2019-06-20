@@ -97,3 +97,14 @@ Display composer module version in the admin
 Fix attribute code not lowercase causing issue on product import and simple product association
 
 Add new options for updated filters
+
+### 100.2.7 :
+Fix ACL issues in Magento 2 admin
+
+Add category tree filter
+
+Add multi-import in shell
+
+Add color in shell
+
+Fix attribute group import error when code and name don't match
