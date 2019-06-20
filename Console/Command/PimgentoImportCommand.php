@@ -107,7 +107,7 @@ class PimgentoImportCommand extends Command
      *
      * @return bool
      */
-    protected function import(string $code, OutputInterface $output): bool
+    protected function import(string $code, OutputInterface $output)
     {
         /** @var Import $import */
         $import = $this->importRepository->getByCode($code);
