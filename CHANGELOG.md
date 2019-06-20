@@ -76,3 +76,24 @@ Add category configurations for anchor, status and display in menu
 
 ### 100.2.5 :
 Refactor API requests from configured mapping to improve performance and reduce data inserted in temporary table
+
+### 100.2.6 :
+Add proxy class for command
+
+Fix product not imported it is the only one returned by API call
+
+Display warning message when category or family is missing label
+
+Fix error on format value for attribute price
+
+Fetch Akeneo channels by API
+
+Fix wrong step number in family import
+
+Fix issue with family exclusion multiselect in the configuration
+
+Display composer module version in the admin
+
+Fix attribute code not lowercase causing issue on product import and simple product association
+
+Add new options for updated filters
