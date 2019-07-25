@@ -1,5 +1,15 @@
 ![PIMGento2](doc/pimgento2-api-logo.png)
 
+# PIMGento2 (API) is now "Akeneo Connector for Magento 2"
+
+PIMGento2 (API) is now "Akeneo Connector for Magento 2" !
+
+Discover this new version on the official on the [Akeneo Marketplace](https://marketplace.akeneo.com/connect-your-akeneo-pim-magento).
+
+> **PIMGento2 (API) repository is now deprecated and will be archived on September 25, 2019.** 
+
+> If you want to migrate to the new connector, please follow our [migration guides](https://help.akeneo.com/magento2-connector/v100/articles/upgrade-connector.html) on the Akeneo Help Center.
+
 # PIMGento2 (API)
 
 PIMGento2 (API) is a Magento 2 extension that allows you to import your catalog from Akeneo API into Magento.

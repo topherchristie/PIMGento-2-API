@@ -108,3 +108,6 @@ Add multi-import in shell
 Add color in shell
 
 Fix attribute group import error when code and name don't match
+
+### 100.2.8 :
+Suggest new Akeneo Connector for Magento 2 and add deprecation notice
