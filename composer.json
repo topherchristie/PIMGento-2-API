@@ -31,5 +31,8 @@
       "homepage": "https://www.dnd.fr/",
       "role": "Developer"
     }
-  ]
+  ],
+  "suggest": {
+    "akeneo/module-magento2-connector-community": "Akeneo Connector for Magento 2"
+  }
 }
