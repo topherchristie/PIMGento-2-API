@@ -12,6 +12,7 @@ use Magento\Catalog\Model\Category as CategoryModel;
 use Magento\Framework\App\Cache\Type\Block;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\DB\Select;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -30,7 +31,6 @@ use Pimgento\Api\Helper\Serializer as JsonSerializer;
 use Pimgento\Api\Helper\Import\Product as ProductImportHelper;
 use Zend_Db_Expr as Expr;
 use Zend_Db_Statement_Pdo;
-
 /**
  * Class Product
  *
@@ -41,6 +41,17 @@ use Zend_Db_Statement_Pdo;
  * @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  * @link      https://www.pimgento.com/
  */
+class Pid {
+    public $id;
+}
+
+class OneSpecimenPerClassStorage extends \SplObjectStorage
+{
+    public function getHash($o)
+    {
+        return $o->id;
+    }
+}
 class Product extends Import
 {
     /**
@@ -183,7 +194,7 @@ class Product extends Import
      * @var StoreHelper $storeHelper
      */
     protected $storeHelper;
-
+    protected $productsWithAssets;
     /**
      * Product constructor.
      *
@@ -259,6 +270,44 @@ class Product extends Import
         }
 
         $this->entitiesHelper->createTmpTableFromApi($product, $this->getCode());
+         $this->createAssetTmpTable();
+    }
+
+
+    private function createAssetTmpTable()
+    {
+        $connection = $this->entitiesHelper->getConnection();
+        $tableSuffix = 'product_asset_map';
+        /* Delete table if exists */
+        $this->entitiesHelper->dropTable($tableSuffix);
+        /** @var string $tableName */
+        $tableName = $this->entitiesHelper->getTableName($tableSuffix);
+
+        /* Create new table */
+        /** @var Table $table */
+        $table = $connection->newTable($tableName);
+
+
+        /** @var string $column */
+        $table->addColumn(
+            'file_id',
+            Table::TYPE_TEXT,
+            null,
+            [],
+            'file id'
+        );
+
+        $table->addColumn(
+            '_entity_id',
+            Table::TYPE_INTEGER,
+            11,
+            [],
+            'Entity Id'
+        );
+
+        $table->setOption('type', 'MYISAM');
+
+        $connection->createTable($table);
     }
 
     /**
@@ -306,6 +355,15 @@ class Product extends Import
         $this->setMessage(__('%1 line(s) found', $index));
     }
 
+    public function addToAssetMap($product_id, $file)
+    {
+        $connection = $this->entitiesHelper->getConnection();
+        $data = [
+            'file_id'            => $file,
+            '_entity_id'              => $product_id,
+        ];
+        $connection->insert($this->entitiesHelper->getTableName('product_asset_map'), $data);
+    }
     /**
      * Create configurable products
      *
@@ -488,6 +546,7 @@ class Product extends Import
 
         /** @var string|null $groupColumn */
         $groupColumn = null;
+
         if ($connection->tableColumnExists($tmpTable, 'parent')) {
             $groupColumn = 'parent';
         }
@@ -500,7 +559,6 @@ class Product extends Import
 
             return;
         }
-
         $connection->addColumn($tmpTable, '_children', 'text');
         $connection->addColumn(
             $tmpTable,
@@ -1401,7 +1459,55 @@ class Product extends Import
             }
         }
     }
+    public function hasFiles($product_id) {
+        $connection = $this->entitiesHelper->getConnection();
+        $assetMapTable = $this->entitiesHelper->getTableName('product_asset_map');
+        $sql = sprintf('SELECT COUNT(*) as `cnt` FROM `%s` WHERE _entity_id =\'%s\'', $assetMapTable, $product_id);
+        $cnt = $connection->rawFetchRow($sql, 'cnt');
+        if ($cnt > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
+    public function cleanupAssetsAndMedia() {
+        /** @var AdapterInterface $connection */
+	    $connection = $this->entitiesHelper->getConnection();
+        /** @var string $galleryTable */
+        $galleryTable = $this->entitiesHelper->getTable('catalog_product_entity_media_gallery');
+        /** @var string $galleryEntityTable */
+	    $galleryEntityTable = $this->entitiesHelper->getTable('catalog_product_entity_media_gallery_value_to_entity');
+        $assetMapTable = $this->entitiesHelper->getTableName('product_asset_map');
+        
+        $tmpTable = $this->entitiesHelper->getTableName($this->getCode());
+        $select = $connection->select()->from(
+            $tmpTable,
+            [
+                '_entity_id' => '_entity_id'
+            ]
+        );
+
+        /** @var \Magento\Framework\DB\Statement\Pdo\Mysql $query */
+        $query = $connection->query($select);
+        $i = 0;
+        /** @var array $row */
+        while (($row = $query->fetch())) {
+            $cleaner = $connection->select()->from($galleryTable, ['value_id'])->where('value NOT IN (select file_id from '.$assetMapTable.' where _entity_id = ?)', $row['_entity_id']);
+            $i = $i + 1;
+            $connection->delete(
+                $galleryEntityTable,
+                [
+                    'value_id IN (?)'          => $cleaner,
+                    'row_id' . ' = ?' => $row['_entity_id'],
+                ]
+                );
+
+        }
+        $this->setMessage(
+            __('Clean assets and media ran for '.$i.' products.')
+        );
+    }
     /**
      * Set Url Rewrite
      *
@@ -1775,20 +1881,9 @@ class Product extends Import
                     ];
                     $connection->insertOnDuplicate($productImageTable, $data, array_keys($data));
                 }
-
+                $this->addToAssetMap($row[$columnIdentifier], $file);
                 $files[] = $file;
             }
-
-            /** @var \Magento\Framework\DB\Select $cleaner */
-            $cleaner = $connection->select()->from($galleryTable, ['value_id'])->where('value NOT IN (?)', $files);
-
-            $connection->delete(
-                $galleryEntityTable,
-                [
-                    'value_id IN (?)'          => $cleaner,
-                    $columnIdentifier . ' = ?' => $row[$columnIdentifier],
-                ]
-            );
         }
     }
 
@@ -1947,7 +2042,7 @@ class Product extends Import
                     ];
                     $connection->insertOnDuplicate($galleryValueTable, $data, array_keys($data));
 
-                    if (empty($files)) {
+                    if (!$this->hasFiles($row[$columnIdentifier]) ) {
                         /** @var array $entities */
                         $attributes = [
                             $this->configHelper->getAttribute(ProductModel::ENTITY, 'image'),
@@ -1969,21 +2064,10 @@ class Product extends Import
                             $connection->insertOnDuplicate($productImageTable, $data, array_keys($data));
                         }
                     }
-
+                    $this->addToAssetMap($row[$columnIdentifier], $file);
                     $files[] = $file;
                 }
             }
-
-            /** @var \Magento\Framework\DB\Select $cleaner */
-            $cleaner = $connection->select()->from($galleryTable, ['value_id'])->where('value NOT IN (?)', $files);
-
-            $connection->delete(
-                $galleryEntityTable,
-                [
-                    'value_id IN (?)'          => $cleaner,
-                    $columnIdentifier . ' = ?' => $row[$columnIdentifier],
-                ]
-            );
         }
     }
 
@@ -1995,6 +2079,8 @@ class Product extends Import
     public function dropTable()
     {
         $this->entitiesHelper->dropTable($this->getCode());
+        $this->entitiesHelper->dropTable('product_asset_map');
+
     }
 
     /**
