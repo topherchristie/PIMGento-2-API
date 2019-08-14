@@ -2078,7 +2078,8 @@ class Product extends Import
      */
     public function dropTable()
     {
-        $this->entitiesHelper->dropTable($this->getCode());
+        // TODO: for testing not dropping table to see how it is populated
+        // $this->entitiesHelper->dropTable($this->getCode());
         $this->entitiesHelper->dropTable('product_asset_map');
 
     }
@@ -2101,7 +2102,7 @@ class Product extends Import
             $this->cacheTypeList->cleanType($type);
         }
 
-        $this->setMessage(__('Cache cleaned for BLAHBLAH: %1', join(', ', $types)));
+        $this->setMessage(__('Cache cleaned for: %1', join(', ', $types)));
     }
 
     /**
