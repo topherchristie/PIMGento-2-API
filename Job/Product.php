@@ -226,8 +226,7 @@ class Product extends Import
         ProductModel $product,
         ProductUrlPathGenerator $productUrlPathGenerator,
         TypeListInterface $cacheTypeList,
-        StoreHelper $storeHelper,
-        \Magento\Framework\Event\Manager $eventManager,
+        StoreHelper $storeHelper
         array $data = []
     ) {
         parent::__construct($outputHelper, $eventManager, $authenticator, $data);
@@ -2086,7 +2085,7 @@ class Product extends Import
         // $this->entitiesHelper->dropTable($this->getCode());
         $this->entitiesHelper->dropTable('product_asset_map');
 
-        $eventData = null;
+        // $eventData = null;
         // Code...
         $this->eventManager->dispatch('my_module_event_before');
         // More code that sets $eventData...
