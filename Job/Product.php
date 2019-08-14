@@ -2101,7 +2101,7 @@ class Product extends Import
             $this->cacheTypeList->cleanType($type);
         }
 
-        $this->setMessage(__('Cache cleaned for: %1', join(', ', $types)));
+        $this->setMessage(__('Cache cleaned for BLAHBLAH: %1', join(', ', $types)));
     }
 
     /**
