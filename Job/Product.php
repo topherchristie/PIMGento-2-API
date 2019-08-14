@@ -17,6 +17,7 @@ use Magento\Framework\DB\Select;
 use Magento\Framework\Event\ManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\App\Cache\TypeListInterface;
+use Magento\Framework\Event\ObserverInterface;
 use Magento\PageCache\Model\Cache\Type;
 use Magento\CatalogUrlRewrite\Model\ProductUrlPathGenerator;
 use Magento\CatalogUrlRewrite\Model\ProductUrlRewriteGenerator;
@@ -195,6 +196,7 @@ class Product extends Import
      */
     protected $storeHelper;
     protected $productsWithAssets;
+    private $eventManager;
     /**
      * Product constructor.
      *
@@ -225,6 +227,7 @@ class Product extends Import
         ProductUrlPathGenerator $productUrlPathGenerator,
         TypeListInterface $cacheTypeList,
         StoreHelper $storeHelper,
+        \Magento\Framework\Event\Manager $eventManager,
         array $data = []
     ) {
         parent::__construct($outputHelper, $eventManager, $authenticator, $data);
@@ -238,6 +241,7 @@ class Product extends Import
         $this->cacheTypeList           = $cacheTypeList;
         $this->storeHelper             = $storeHelper;
         $this->productUrlPathGenerator = $productUrlPathGenerator;
+        $this->eventManager            = $eventManager;
     }
 
     /**
@@ -2081,6 +2085,12 @@ class Product extends Import
         // TODO: for testing not dropping table to see how it is populated
         // $this->entitiesHelper->dropTable($this->getCode());
         $this->entitiesHelper->dropTable('product_asset_map');
+
+        $eventData = null;
+        // Code...
+        $this->eventManager->dispatch('my_module_event_before');
+        // More code that sets $eventData...
+        // $this->eventManager->dispatch('my_module_event_after', ['myEventData' => $eventData]);
 
     }
 
