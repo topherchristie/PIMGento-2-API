@@ -226,7 +226,7 @@ class Product extends Import
         ProductModel $product,
         ProductUrlPathGenerator $productUrlPathGenerator,
         TypeListInterface $cacheTypeList,
-        StoreHelper $storeHelper
+        StoreHelper $storeHelper,
         array $data = []
     ) {
         parent::__construct($outputHelper, $eventManager, $authenticator, $data);
