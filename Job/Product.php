@@ -32,6 +32,8 @@ use Pimgento\Api\Helper\Serializer as JsonSerializer;
 use Pimgento\Api\Helper\Import\Product as ProductImportHelper;
 use Zend_Db_Expr as Expr;
 use Zend_Db_Statement_Pdo;
+use Psr\Log\LoggerInterface as Logger;
+
 /**
  * Class Product
  *
@@ -197,6 +199,7 @@ class Product extends Import
     protected $storeHelper;
     protected $productsWithAssets;
     private $eventManager;
+    protected $logger;
     /**
      * Product constructor.
      *
@@ -227,6 +230,7 @@ class Product extends Import
         ProductUrlPathGenerator $productUrlPathGenerator,
         TypeListInterface $cacheTypeList,
         StoreHelper $storeHelper,
+        Logger $logger,
         array $data = []
     ) {
         parent::__construct($outputHelper, $eventManager, $authenticator, $data);
@@ -241,6 +245,7 @@ class Product extends Import
         $this->storeHelper             = $storeHelper;
         $this->productUrlPathGenerator = $productUrlPathGenerator;
         $this->eventManager            = $eventManager;
+        $this->logger = $logger;
     }
 
     /**
@@ -2087,7 +2092,10 @@ class Product extends Import
 
         // $eventData = null;
         // Code...
-        $this->eventManager->dispatch('my_module_event_before');
+        $this->eventManager->dispatch('magento.catalog.product_management.updated');
+        $this->info('called magento.catalog.product_management.updated');
+        $this->info($this->product);
+        
         // More code that sets $eventData...
         // $this->eventManager->dispatch('my_module_event_after', ['myEventData' => $eventData]);
 
