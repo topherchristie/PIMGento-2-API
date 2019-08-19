@@ -2091,7 +2091,7 @@ class Product extends Import
         // $eventData = null;
         // Code...
         $this->eventManager->dispatch('magento.catalog.product_management.updated');
-        $this->info('called magento.catalog.product_management.updated');
+        $this->logger->info('called magento.catalog.product_management.updated');
         $this->info($this->product);
         
         // More code that sets $eventData...
