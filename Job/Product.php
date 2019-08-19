@@ -198,7 +198,6 @@ class Product extends Import
      */
     protected $storeHelper;
     protected $productsWithAssets;
-    private $eventManager;
     protected $logger;
     /**
      * Product constructor.
@@ -244,7 +243,6 @@ class Product extends Import
         $this->cacheTypeList           = $cacheTypeList;
         $this->storeHelper             = $storeHelper;
         $this->productUrlPathGenerator = $productUrlPathGenerator;
-        $this->eventManager            = $eventManager;
         $this->logger = $logger;
     }
 
