@@ -625,6 +625,8 @@ class Product extends Import
                         $associationName
                     ) && $connection->tableColumnExists($tmpTable, $associationName)) {
                     $data[$associationName] = sprintf('v.%s', $associationName);
+
+                    $this->logger->info($data[$associationName].sprintf('v.%s', $associationName));
                 }
             }
         }
