@@ -625,8 +625,6 @@ class Product extends Import
                         $associationName
                     ) && $connection->tableColumnExists($tmpTable, $associationName)) {
                     $data[$associationName] = sprintf('v.%s', $associationName);
-
-                    $this->logger->info($data[$associationName].sprintf('v.%s', $associationName));
                 }
             }
         }
@@ -685,6 +683,8 @@ class Product extends Import
                 if ($connection->tableColumnExists($productModelTable, $column)) {
                     $data[$column] = 'v.' . $column;
                 }
+
+                $this->logger->info('$data[$column]:'.$data[$column].' : '.$column);
             }
         }
 
@@ -695,6 +695,9 @@ class Product extends Import
             ->where('e.' . $groupColumn . ' <> ""')
             ->group('e.' . $groupColumn);
 
+
+        $this->logger->info($configurable, $tmpTable, array_keys($data));
+        
         /** @var string $query */
         $query = $connection->insertFromSelect($configurable, $tmpTable, array_keys($data));
 
@@ -2094,7 +2097,6 @@ class Product extends Import
         // Code...
         $this->eventManager->dispatch('magento.catalog.product_management.updated');
         $this->logger->info('called magento.catalog.product_management.updated');
-        $this->info($this->product);
         
         // More code that sets $eventData...
         // $this->eventManager->dispatch('my_module_event_after', ['myEventData' => $eventData]);
