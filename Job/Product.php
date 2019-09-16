@@ -696,7 +696,9 @@ class Product extends Import
             ->group('e.' . $groupColumn);
 
 
-        $this->logger->info($configurable, $tmpTable, array_keys($data));
+        $this->logger->info($configurable);
+        $this->logger->info($tmpTable);
+        $this->logger->info($array_keys($data));
         
         /** @var string $query */
         $query = $connection->insertFromSelect($configurable, $tmpTable, array_keys($data));
