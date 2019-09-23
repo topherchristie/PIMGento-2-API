@@ -1472,6 +1472,12 @@ class Product extends Import
     }
 
     public function cleanupAssetsAndMedia() {
+
+        if (!$this->configHelper->isAssetImportEnabled() && !$this->configHelper->isMediaImportEnabled()) {
+            $this->setMessage(__('Media and Asset import is not enabled do not clean up assets'));
+            return;
+        }
+
         /** @var AdapterInterface $connection */
 	    $connection = $this->entitiesHelper->getConnection();
         /** @var string $galleryTable */
